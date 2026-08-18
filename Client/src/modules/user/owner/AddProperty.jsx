@@ -10,15 +10,15 @@ function AddProperty() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [propertyDetails, setPropertyDetails] = useState({
-    title: "residential", // Schema: title
-    type: "rent", // Schema: type
-    address: "", // Schema: address
+    title: "residential", 
+    type: "rent", 
+    address: "", 
     contact: "",
-    price: "", // Schema: price
+    price: "", 
     description: "",
   });
   const navigate = useNavigate();
-  const API_URL = "http://localhost:5000";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -42,7 +42,7 @@ function AddProperty() {
     e.preventDefault();
     setLoading(true);
 
-    // Validation
+    
     if (!propertyDetails.address ||!propertyDetails.price ||!propertyDetails.contact) {
       message.error("Please fill Address, Price and Contact");
       setLoading(false);
@@ -63,13 +63,13 @@ function AddProperty() {
     }
 
     const formData = new FormData();
-    formData.append("title", propertyDetails.title); // Schema pramane
-    formData.append("type", propertyDetails.type); // Schema pramane
-    formData.append("address", propertyDetails.address); // Schema pramane
+    formData.append("title", propertyDetails.title); 
+    formData.append("type", propertyDetails.type); 
+    formData.append("address", propertyDetails.address); 
     formData.append("contact", propertyDetails.contact);
-    formData.append("price", propertyDetails.price); // Schema pramane
+    formData.append("price", propertyDetails.price); 
     formData.append("description", propertyDetails.description);
-    formData.append("images", image); // Schema: images
+    formData.append("images", image); 
 
     try {
       const res = await axios.post(

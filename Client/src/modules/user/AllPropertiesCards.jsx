@@ -16,7 +16,7 @@ const AllPropertiesCards = () => {
   const [userDetails, setUserDetails] = useState({ fullName: "", phone: "" });
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
-  const API_URL = "http://localhost:5000";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
@@ -66,7 +66,7 @@ const AllPropertiesCards = () => {
     getAllProperties();
   }, []);
 
-  // FILTER FIX: backend pramane
+  
   const filteredProperties = allProperties
     .filter((property) => filterPropertyAddress === "" || property.address?.toLowerCase().includes(filterPropertyAddress.toLowerCase()))
     .filter((property) => filterPropertyAdType === "" || property.type?.toLowerCase().includes(filterPropertyAdType.toLowerCase()))

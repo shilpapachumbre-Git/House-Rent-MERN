@@ -7,8 +7,8 @@ const OwnerAllBookings = () => {
   const [allBookings, setAllBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const API_URL = "http://localhost:5000";
-  const userName = localStorage.getItem("userName") || "Owner"; // Navbar sathi
+  const API_URL = import.meta.env.VITE_API_URL;
+  const userName = localStorage.getItem("userName") || "Owner"; 
 
   const getAllBookings = async () => {
     try {
@@ -68,7 +68,7 @@ const OwnerAllBookings = () => {
   };
 
   const getStatusColor = (status) => {
-    if(status === 'approved') return 'text-green-500'; // booked
+    if(status === 'approved') return 'text-green-500'; 
     if(status === 'pending') return 'text-yellow-400';
     if(status === 'cancelled') return 'text-red-500';
     return 'text-gray-400';

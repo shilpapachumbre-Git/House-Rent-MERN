@@ -13,7 +13,7 @@ const AllUsers = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if(res.data.success){ // <- success check add
+      if(res.data.success){ 
         setUsers(res.data.users);
       }
     } catch (error) {
@@ -27,14 +27,14 @@ const AllUsers = () => {
   const handleStatus = async (userid, status) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:5000/api/admin/handlestatus", 
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/handlestatus`, 
         { userid, status }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       if(res.data.success){
-        alert(res.data.message); // <- success message
-        fetchUsers(); // refresh
+        alert(res.data.message); 
+        fetchUsers(); 
       }
     } catch (error) {
       alert(error.response?.data?.message || "Failed to update status");

@@ -9,7 +9,7 @@ const AllProperty = () => {
   const [allProperties, setAllProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const API_URL = "http://localhost:5000";
+  const API_URL = import.meta.env.vITE_API_URL;
 
   const getAllProperty = async () => {
     try {
