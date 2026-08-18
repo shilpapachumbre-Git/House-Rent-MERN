@@ -2,7 +2,7 @@ services:
     - type: web
     name: house-rent-mern
     env: node
-    rootDir: ./
+    rootDir: ./Server
     buildCommand: npm install
     startCommand: npm start
     autoDeploy: true
