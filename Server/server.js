@@ -11,35 +11,37 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-// 1. BODY PARSER
+// Middleware
 app.use(express.json()); 
 
+// CORS - Render + Localhost donhila permission
+const allowedOrigins = [
+  "https://house-rent-mern-client.onrender.com", // Render varcha Client URL
+  "http://localhost:5174" // Local testing sathi
+];
 
-// 2. CORS - FAKT HE
 app.use(cors({
-  origin: "http://localhost:5174", // React cha exact port
+  origin: allowedOrigins, 
   credentials: true
 }));
 
-// 3. STATIC
-app.use('/uploads', express.static('uploads'));
+// Static folder for uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// 4. ROUTES
+// Routes
 const userRoutes = require("./routes/userRoutes");
 const ownerRoutes = require("./routes/ownerRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
-
-
 app.use("/api/user", userRoutes); 
 app.use("/api/owner", ownerRoutes);
-
 app.use("/api/admin", adminRoutes);
 
+// Test route
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
