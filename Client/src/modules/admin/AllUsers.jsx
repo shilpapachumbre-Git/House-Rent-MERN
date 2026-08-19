@@ -5,11 +5,14 @@ const AllUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // IMP: Fallback takla. Jar .env nahi milala tari backend hit hoil
+  const API_URL = import.meta.env.VITE_API_URL || "https://house-rent-mern.onrender.com";
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/admin/users", { 
+      const res = await axios.get(`${API_URL}/api/admin/users`, { 
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -27,7 +30,7 @@ const AllUsers = () => {
   const handleStatus = async (userid, status) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/handlestatus`, 
+      const res = await axios.post(`${API_URL}/api/admin/handlestatus`, 
         { userid, status }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -68,7 +71,6 @@ const AllUsers = () => {
                 <td className="py-2 px-4 border-b border-gray-700">{user.email}</td>
                 <td className="py-2 px-4 border-b border-gray-700 capitalize">
                   {user.role === 'renter' ? 'Renter' : user.role === 'owner' ? 'Owner' : 'Admin'} 
-                  {/* <- user > Renter disel */}
                 </td> 
                 <td className={`py-2 px-4 border-b border-gray-700 text-center font-medium ${
                   user.isGranted ? "text-green-400" : "text-red-400"
