@@ -10,15 +10,17 @@ function AddProperty() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [propertyDetails, setPropertyDetails] = useState({
-    title: "residential", 
-    type: "rent", 
-    address: "", 
+    title: "residential",
+    type: "rent",
+    address: "",
     contact: "",
-    price: "", 
+    price: "",
     description: "",
   });
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL;
+
+  // IMP: Fallback takla. Yane undefined cha issue jail
+  const API_URL = import.meta.env.VITE_API_URL || "https://house-rent-mern.onrender.com";
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -42,7 +44,6 @@ function AddProperty() {
     e.preventDefault();
     setLoading(true);
 
-    
     if (!propertyDetails.address ||!propertyDetails.price ||!propertyDetails.contact) {
       message.error("Please fill Address, Price and Contact");
       setLoading(false);
@@ -63,13 +64,13 @@ function AddProperty() {
     }
 
     const formData = new FormData();
-    formData.append("title", propertyDetails.title); 
-    formData.append("type", propertyDetails.type); 
-    formData.append("address", propertyDetails.address); 
+    formData.append("title", propertyDetails.title);
+    formData.append("type", propertyDetails.type);
+    formData.append("address", propertyDetails.address);
     formData.append("contact", propertyDetails.contact);
-    formData.append("price", propertyDetails.price); 
+    formData.append("price", propertyDetails.price);
     formData.append("description", propertyDetails.description);
-    formData.append("images", image); 
+    formData.append("images", image); // Backend madhe "image" aahe ka "images" check kar
 
     try {
       const res = await axios.post(

@@ -30,7 +30,6 @@ const AllProperty = () => {
 
       if (response.data.success) {
         setAllProperties(response.data.properties);
-        console.log("Properties:", response.data.properties); // Check karayla
       } else {
         message.error(response.data.message || "Unauthorized access");
         navigate("/login");
@@ -47,8 +46,8 @@ const AllProperty = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(
-        `${API_URL}/api/admin/properties/approve/${id}`,
-        {},
+        `${API_URL}/api/admin/properties/approve/${id}`, 
+        {}, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if(res.data.success){
@@ -65,7 +64,7 @@ const AllProperty = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.delete(
-          `${API_URL}/api/admin/properties/${id}`,
+          `${API_URL}/api/admin/properties/${id}`, 
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if(res.data.success){
@@ -89,7 +88,6 @@ const AllProperty = () => {
         <table className="min-w-full text-sm text-left text-gray-300">
           <thead className="bg-indigo-600/80 text-white">
             <tr>
-              <th className="py-3 px-4">Image</th> {/* IMAGE COLUMN ADD */}
               <th className="py-3 px-4">Property ID</th>
               <th className="py-3 px-4 text-center">Property Type</th>
               <th className="py-3 px-4 text-center">Ad Type</th>
@@ -101,45 +99,34 @@ const AllProperty = () => {
             </tr>
           </thead>
           <tbody>
-            {allProperties.length > 0? (
+            {allProperties.length > 0 ? (
               allProperties.map((property) => (
                 <tr key={property._id} className="border-b border-gray-700 hover:bg-indigo-500/10">
-
-                  {/* IMAGE TD ADD */}
-                  <td className="py-2 px-4 text-center">
-                    <img
-                      src={`${API_URL}${property.image}`} // Jar image array asel tar property.images[0]
-                      alt={property.title}
-                      className="w-16 h-16 object-cover rounded-lg mx-auto border border-gray-600"
-                      onError={(e)=> e.target.src="https://via.placeholder.com/64x64/374151/9CA3AF?text=No+Img"}
-                    />
-                  </td>
-
-                  <td className="py-2 px-4 text-xs">{property._id}</td>
+                  <td className="py-2 px-4">{property._id}</td>
                   <td className="py-2 px-4 text-center capitalize">{property.title}</td>
                   <td className="py-2 px-4 text-center capitalize">{property.type}</td>
                   <td className="py-2 px-4 text-center">{property.address}</td>
                   <td className="py-2 px-4 text-center">{property.contact || property.owner?.phone || "N/A"}</td>
                   <td className="py-2 px-4 text-center font-semibold text-green-400">₹{property.price?.toLocaleString()}</td>
-
+                  
                   <td className={`py-2 px-4 text-center font-bold ${
-                    property.status === 'approved'? 'text-green-400' : 'text-yellow-400'
+                    property.status === 'approved' ? 'text-green-400' : 'text-yellow-400'
                   }`}>
-                    {property.status === 'approved'? 'Available' : 'Pending'}
+                    {property.status === 'approved' ? 'Available' : 'Pending'}
                   </td>
 
                   <td className="py-2 px-4 text-center space-x-2">
-                    {property.status!== 'approved' && (
-                      <button
+                    {property.status !== 'approved' && (
+                      <button 
                         onClick={() => handleApprove(property._id)}
                         className="px-3 py-1 border-blue-500 text-blue-400 rounded-lg hover:bg-blue-500/20 text-sm"
                       >
                         Approve
                       </button>
                     )}
-                    <button
+                    <button 
                       onClick={() => handleDelete(property._id)}
-                      className="px-3 py-1 border-red-500 text-red-400 rounded-lg hover:bg-red-500/20 text-sm"
+                      className="px-3 py-1 border border-red-500 text-red-400 rounded-lg hover:bg-red-500/20 text-sm"
                     >
                       Delete
                     </button>
@@ -147,7 +134,7 @@ const AllProperty = () => {
                 </tr>
               ))
             ) : (
-              <tr><td colSpan="9" className="text-center py-6 text-gray-400">No properties found</td></tr> {/* colSpan 9 kela */}
+              <tr><td colSpan="8" className="text-center py-6 text-gray-400">No properties found</td></tr>
             )}
           </tbody>
         </table>
