@@ -1,35 +1,17 @@
-const express = require('express');
+const express = require("express");
+const { protect, isOwner } = require("../middleware/authMiddleware");
+const upload = require("../middleware/upload");
+const { addProperty, getOwnerProperties, getOwnerBookings, acceptBooking, rejectBooking, updateProperty, deleteProperty } = require("../controllers/ownerController");
+
 const router = express.Router();
 
-// IMP: cloudinary + multer config
-const upload = require('../config/cloudinary');
-
-const {
-  addProperty,
-  getOwnerProperties,
-  updateProperty,
-  deleteProperty,
-  getOwnerBookings,
-  acceptBooking,
-  rejectBooking
-} = require('../controllers/ownerController');
-
-const { protect, isOwner } = require('../middleware/authMiddleware');
-
-router.use(protect, isOwner);
-
-// CHANGE: single('image') -> array('images', 5)
-router.post('/add-property', upload.array('images', 5), addProperty);
-
-router.get('/properties', getOwnerProperties);
-router.get('/bookings', getOwnerBookings);
-
-router.put('/bookings/:id/accept', acceptBooking);
-router.put('/bookings/:id/reject', rejectBooking);
-
-// CHANGE: single('image') -> array('images', 5)
-router.put('/update-property/:id', upload.array('images', 5), updateProperty);
-
-router.delete('/delete-property/:id', deleteProperty);
+// KEY CHANGE: upload.array kela aahe
+router.post("/add-property", protect, isOwner, upload.array("images", 1), addProperty);
+router.get("/my-properties", protect, isOwner, getOwnerProperties);
+router.get("/my-bookings", protect, isOwner, getOwnerBookings);
+router.put("/booking/:id/accept", protect, isOwner, acceptBooking);
+router.put("/booking/:id/reject", protect, isOwner, rejectBooking);
+router.put("/property/:id", protect, isOwner, upload.array("images", 1), updateProperty);
+router.delete("/property/:id", protect, isOwner, deleteProperty);
 
 module.exports = router;
