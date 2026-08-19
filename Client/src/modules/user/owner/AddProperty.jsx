@@ -60,7 +60,7 @@ function AddProperty() {
     formData.append("contact", propertyDetails.contact);
     formData.append("price", propertyDetails.price);
     formData.append("description", propertyDetails.description);
-    formData.append("image", image); // IMPORTANT: "image" single aahe
+    formData.append("images", image); // <-- IMPORTANT: "images" kelay. Backend la match honar
 
     try {
       const res = await axios.post(
@@ -92,7 +92,7 @@ function AddProperty() {
 
       <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
-          <select name="title" value={propertyDetails.title} onChange={handleChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3">
+          <select name="title" value={propertyDetails.title} onChange={handleChange} className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3">
             <option value="residential">Residential</option>
             <option value="commercial">Commercial</option>
             <option value="land/plot">Land/Plot</option>
@@ -105,17 +105,17 @@ function AddProperty() {
 
           <input type="text" name="address" value={propertyDetails.address} onChange={handleChange} placeholder="Full Address" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
-          <input type="tel" name="contact" value={propertyDetails.contact} onChange={handleChange} placeholder="Contact No" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+          <input type="tel" name="contact" value={propertyDetails.contact} onChange={handleChange} placeholder="Contact No" required className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
-          <input type="number" name="price" value={propertyDetails.price} onChange={handleChange} placeholder="Price ₹" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+          <input type="number" name="price" value={propertyDetails.price} onChange={handleChange} placeholder="Price ₹" required className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
           <div>
-            <input type="file" name="image" accept="image/*" required onChange={handleImageChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white"/>
+            <input type="file" name="images" accept="image/*" required onChange={handleImageChange} className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white"/>
             {imagePreview && <img src={imagePreview} alt="preview" className="mt-2 h-24 w-24 object-cover rounded" />}
           </div>
         </div>
 
-        <textarea name="description" value={propertyDetails.description} onChange={handleChange} rows={4} placeholder="Additional Details..." className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+        <textarea name="description" value={propertyDetails.description} onChange={handleChange} rows={4} placeholder="Additional Details..." className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
         <button type="submit" disabled={loading} className="w-full font-semibold py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
           {loading? "Submitting..." : "Submit For Approval"}
