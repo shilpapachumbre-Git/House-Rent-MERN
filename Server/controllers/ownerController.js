@@ -1,5 +1,13 @@
 const Property = require('../models/PropertySchema');
 const Booking = require('../models/BookingSchema');
+const cloudinary = require('cloudinary').v2; // v2 confirm
+
+// Cloudinary config - Render env var varun yeil
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // Add Property
 exports.addProperty = async (req, res) => {
@@ -8,7 +16,7 @@ exports.addProperty = async (req, res) => {
     console.log("BODY:", req.body);
     console.log("FILES:", req.files);
     console.log("CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
-    console.log("USER ID:", req.user.id); // NEW LINE
+    console.log("USER ID:", req.user.id);
 
     const { title, type, address, price, contact, description } = req.body;
 
@@ -27,12 +35,12 @@ exports.addProperty = async (req, res) => {
       description,
       contact,
       owner: req.user.id,
-      images: [imageUrl] // array madhe save
+      images: [imageUrl]
     });
     await property.save();
     res.status(201).json({ success: true, message: "Property Added", property });
   } catch (err) {
-    console.log("Add Property Error:", err);
+    console.log("Add Property Error:", err.stack);
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -54,9 +62,9 @@ exports.getOwnerBookings = async (req, res) => {
     const propertyIds = properties.map(p => p._id);
 
     const bookings = await Booking.find({ propertyId: { $in: propertyIds } })
-    .populate('propertyId', 'title address price images')
-    .populate('userId', 'name email phone')
-    .sort({ createdAt: -1 });
+   .populate('propertyId', 'title address price images')
+   .populate('userId', 'name email phone')
+   .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, bookings });
   } catch (err) {
@@ -86,8 +94,8 @@ exports.acceptBooking = async (req, res) => {
     await booking.save();
 
     booking = await Booking.findById(req.params.id)
-    .populate('propertyId', 'title address price images')
-    .populate('userId', 'name phone');
+   .populate('propertyId', 'title address price images')
+   .populate('userId', 'name phone');
 
     res.status(200).json({ success: true, message: "Booking Accepted", booking });
   } catch (err) {
@@ -117,8 +125,8 @@ exports.rejectBooking = async (req, res) => {
     await booking.save();
 
     booking = await Booking.findById(req.params.id)
-    .populate('propertyId', 'title address price images')
-    .populate('userId', 'name phone');
+   .populate('propertyId', 'title address price images')
+   .populate('userId', 'name phone');
 
     res.status(200).json({ success: true, message: "Booking Rejected", booking });
   } catch (err) {
