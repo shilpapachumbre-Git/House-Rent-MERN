@@ -6,7 +6,7 @@ const {
   getAllPropertiesController, 
   authController, 
   bookingHandleController, 
-  getAllBookingsController // <-- controller madhe he nav aahe
+  getAllBookingsController // 
 } = require("../controllers/userController");
 
 const { protect } = require("../middleware/authMiddleware"); 
@@ -22,6 +22,6 @@ router.get("/properties", getAllPropertiesController);
 // Protected Routes
 router.get("/me", protect, authController);
 router.post("/bookinghandle/:propertyid", protect, bookingHandleController); 
-router.get("/bookings", protect, getAllBookingsController); // <-- Frontend pan yach URL la hit karel
+router.get("/bookings", protect, getAllBookingsController); // 
 
 module.exports = router;
