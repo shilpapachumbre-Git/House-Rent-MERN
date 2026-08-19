@@ -4,12 +4,17 @@ const Booking = require('../models/BookingSchema');
 // Add Property
 exports.addProperty = async (req, res) => {
   try {
+    console.log("=== ADD PROPERTY CALLED ===");
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
+    console.log("CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME); // key aali ka check
+
     const { title, type, address, price, contact, description } = req.body;
 
-    // req.files[0].path = Cloudinary cha URL
     const imageUrl = req.files && req.files.length > 0? req.files[0].path : "";
 
     if (!imageUrl) {
+      console.log("ERROR: No image found");
       return res.status(400).json({ success: false, message: "Image is required" });
     }
 
@@ -21,7 +26,7 @@ exports.addProperty = async (req, res) => {
       description,
       contact,
       owner: req.user.id,
-      images: [imageUrl] // array madhe save kar
+      images: [imageUrl] // array madhe save
     });
     await property.save();
     res.status(201).json({ success: true, message: "Property Added", property });
@@ -48,9 +53,9 @@ exports.getOwnerBookings = async (req, res) => {
     const propertyIds = properties.map(p => p._id);
 
     const bookings = await Booking.find({ propertyId: { $in: propertyIds } })
-   .populate('propertyId', 'title address price images')
-   .populate('userId', 'name email phone')
-   .sort({ createdAt: -1 });
+     .populate('propertyId', 'title address price images')
+     .populate('userId', 'name email phone')
+     .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, bookings });
   } catch (err) {
@@ -80,8 +85,8 @@ exports.acceptBooking = async (req, res) => {
     await booking.save();
 
     booking = await Booking.findById(req.params.id)
-   .populate('propertyId', 'title address price images')
-   .populate('userId', 'name phone');
+     .populate('propertyId', 'title address price images')
+     .populate('userId', 'name phone');
 
     res.status(200).json({ success: true, message: "Booking Accepted", booking });
   } catch (err) {
@@ -90,7 +95,7 @@ exports.acceptBooking = async (req, res) => {
   }
 };
 
-// REJECT BOOKING - TYPO FIXED
+// REJECT BOOKING
 exports.rejectBooking = async (req, res) => {
   try {
     let booking = await Booking.findById(req.params.id).populate('propertyId');
@@ -100,7 +105,7 @@ exports.rejectBooking = async (req, res) => {
     }
 
     if (booking.propertyId.owner.toString()!== req.user.id.toString()) {
-      return res.status(403).json({ success: false, message: "Not authorized" }); // FIX: vares -> res
+      return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
     if (booking.bookingStatus!== 'pending') {
@@ -111,8 +116,8 @@ exports.rejectBooking = async (req, res) => {
     await booking.save();
 
     booking = await Booking.findById(req.params.id)
-   .populate('propertyId', 'title address price images')
-   .populate('userId', 'name phone');
+     .populate('propertyId', 'title address price images')
+     .populate('userId', 'name phone');
 
     res.status(200).json({ success: true, message: "Booking Rejected", booking });
   } catch (err) {
@@ -125,12 +130,11 @@ exports.rejectBooking = async (req, res) => {
 exports.updateProperty = async (req, res) => {
   try {
     let updateData = {...req.body };
-    // req.files[0].path = Cloudinary cha URL
-    if(req.files && req.files.length > 0){
+    if (req.files && req.files.length > 0) {
       updateData.images = [req.files[0].path];
     }
-    if(updateData.price) updateData.price = Number(updateData.price);
-    if(updateData.type) updateData.type = updateData.type.toLowerCase();
+    if (updateData.price) updateData.price = Number(updateData.price);
+    if (updateData.type) updateData.type = updateData.type.toLowerCase();
 
     const property = await Property.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.status(200).json({ success: true, message: "Property Updated", property });
