@@ -5,6 +5,10 @@ const Booking = require('../models/BookingSchema');
 exports.addProperty = async (req, res) => {
   try {
     const { title, type, address, price, contact, description } = req.body;
+
+    // IMP: Cloudinary direct URL deto req.file.path madhe
+    const imageUrl = req.file? req.file.path : "";
+
     const property = new Property({
       title,
       type: type.toLowerCase(),
@@ -13,7 +17,7 @@ exports.addProperty = async (req, res) => {
       description,
       contact,
       owner: req.user.id,
-      images: req.file ? [req.file.filename] : []
+      images: imageUrl? [imageUrl] : [] // filename chya jagi full URL
     });
     await property.save();
     res.status(201).json({ success: true, message: "Property Added", property });
@@ -38,11 +42,11 @@ exports.getOwnerBookings = async (req, res) => {
   try {
     const properties = await Property.find({ owner: req.user.id }).select('_id');
     const propertyIds = properties.map(p => p._id);
-    
+
     const bookings = await Booking.find({ propertyId: { $in: propertyIds } })
-      .populate('propertyId', 'title address price images')
-      .populate('userId', 'name email phone')
-      .sort({ createdAt: -1 });
+     .populate('propertyId', 'title address price images') // images add kela
+     .populate('userId', 'name email phone')
+     .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, bookings });
   } catch (err) {
@@ -55,26 +59,25 @@ exports.getOwnerBookings = async (req, res) => {
 exports.acceptBooking = async (req, res) => {
   try {
     let booking = await Booking.findById(req.params.id).populate('propertyId');
-    
+
     if (!booking) {
       return res.status(404).json({ success: false, message: "Booking not found" });
     }
 
-    if (booking.propertyId.owner.toString() !== req.user.id.toString()) {
+    if (booking.propertyId.owner.toString()!== req.user.id.toString()) {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    if (booking.bookingStatus !== 'pending') { // <- FIX 1
+    if (booking.bookingStatus!== 'pending') {
       return res.status(400).json({ success: false, message: "Booking already processed" });
     }
 
-    booking.bookingStatus = 'approved'; // <- FIX 2: 'accepted' cha jagah 'approved'
+    booking.bookingStatus = 'approved';
     await booking.save();
 
-    // save nantar parat populate kar
     booking = await Booking.findById(req.params.id)
-      .populate('propertyId', 'title address price')
-      .populate('userId', 'name phone');
+     .populate('propertyId', 'title address price images') // images add kela
+     .populate('userId', 'name phone');
 
     res.status(200).json({ success: true, message: "Booking Accepted", booking });
   } catch (err) {
@@ -87,26 +90,25 @@ exports.acceptBooking = async (req, res) => {
 exports.rejectBooking = async (req, res) => {
   try {
     let booking = await Booking.findById(req.params.id).populate('propertyId');
-    
+
     if (!booking) {
       return res.status(404).json({ success: false, message: "Booking not found" });
     }
 
-    if (booking.propertyId.owner.toString() !== req.user.id.toString()) {
+    if (booking.propertyId.owner.toString()!== req.user.id.toString()) {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    if (booking.bookingStatus !== 'pending') { // <- FIX 1
+    if (booking.bookingStatus!== 'pending') {
       return res.status(400).json({ success: false, message: "Booking already processed" });
     }
 
-    booking.bookingStatus = 'cancelled'; // <- FIX 2: 'rejected' cha jagah 'cancelled'
+    booking.bookingStatus = 'cancelled';
     await booking.save();
 
-    // save nantar parat populate kar
     booking = await Booking.findById(req.params.id)
-      .populate('propertyId', 'title address price')
-      .populate('userId', 'name phone');
+     .populate('propertyId', 'title address price images') // images add kela
+     .populate('userId', 'name phone');
 
     res.status(200).json({ success: true, message: "Booking Rejected", booking });
   } catch (err) {
@@ -120,7 +122,8 @@ exports.updateProperty = async (req, res) => {
   try {
     let updateData = {...req.body };
     if(req.file){
-      updateData.images = [req.file.filename];
+      // IMP: Edit kartana pan Cloudinary URL
+      updateData.images = [req.file.path];
     }
     if(updateData.price) updateData.price = Number(updateData.price);
     const property = await Property.findByIdAndUpdate(req.params.id, updateData, { new: true });
