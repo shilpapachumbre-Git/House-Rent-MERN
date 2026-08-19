@@ -1,10 +1,10 @@
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config();
 
 const connectDB = require("./config/connect");
+const cloudinary = require("./config/cloudinary"); // 1. Cloudinary import kela
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,8 +25,9 @@ app.use(cors({
   credentials: true
 }));
 
-// Static folder for uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// 2. Static folder for uploads DELETE kela 
+// Karan ata image Cloudinary var jatat, server var nahi
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 const userRoutes = require("./routes/userRoutes");
@@ -39,7 +40,7 @@ app.use("/api/admin", adminRoutes);
 
 // Test route
 app.get("/", (req, res) => {
-  res.send("API is running...");
+  res.send("API is running with Cloudinary...");
 });
 
 app.listen(PORT, () => {

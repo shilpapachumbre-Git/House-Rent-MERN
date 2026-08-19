@@ -1,25 +1,19 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const cloudinary = require("../config/cloudinary"); // config/cloudinary.js file pahije
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-// uploads folder nasel tar banav
-const uploadDir = "uploads/";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // folder
-  },
-  filename: function (req, file, cb) {
-    // unique nav: timestamp + originalname
-    cb(null, Date.now() + "-" + file.originalname.replace(/\s/g, ""));
+// 1. Cloudinary Storage banavla - ata uploads folder chi garaj nahi
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "house-rent-properties", // Cloudinary madhe ha folder banvel
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
+    public_id: (req, file) => Date.now() + "-" + file.originalname.replace(/\s/g, ""),
   },
 });
 
+// 2. Image filter - same
 const fileFilter = (req, file, cb) => {
-  // fakt image allow kara
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
   } else {
@@ -27,8 +21,9 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// 3. Multer export
 module.exports = multer({ 
-  storage: storage,
+  storage: storage, // ata diskStorage nahi
   fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
 });
