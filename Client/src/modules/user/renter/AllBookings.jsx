@@ -7,7 +7,7 @@ const AllBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const API_URL = "http://localhost:5000";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const getMyBookings = async () => {
     try {
@@ -30,7 +30,7 @@ const AllBookings = () => {
   };
 
   const getStatusColor = (status) => {
-    if(status === 'approved') return 'text-green-400'; // booked
+    if(status === 'approved') return 'text-green-400'; 
     if(status === 'pending') return 'text-yellow-400';
     if(status === 'cancelled') return 'text-red-400';
     if(status === 'completed') return 'text-blue-400';

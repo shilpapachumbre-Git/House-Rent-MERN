@@ -10,7 +10,7 @@ const AllProperties = () => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [formData, setFormData] = useState({ startDate: "", endDate: "", phone: "" });
   const navigate = useNavigate();
-  const API_URL = "http://localhost:5000";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -39,7 +39,7 @@ const AllProperties = () => {
         `${API_URL}/api/user/bookinghandle/${selectedProperty._id}`,
         {
           ownerId: selectedProperty.owner._id,
-         ...formData // startDate, endDate, phone pathav
+         ...formData 
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -21,7 +21,7 @@ CustomTabPanel.propTypes = {
 };
 
 const RenterHome = () => {
-  const { user, setUser } = useContext(UserContext); // <-- BADAL
+  const { user, setUser } = useContext(UserContext); 
   const navigate = useNavigate();
   const [value, setValue] = useState(0);
 
