@@ -9,7 +9,9 @@ const AllProperty = () => {
   const [allProperties, setAllProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const API_URL = import.meta.env.vITE_API_URL;
+
+  // IMP: Hardcode + Fallback. Yane undefined cha issue jail
+  const API_URL = import.meta.env.VITE_API_URL || "https://house-rent-mern.onrender.com";
 
   const getAllProperty = async () => {
     try {
@@ -34,7 +36,7 @@ const AllProperty = () => {
       }
     } catch (error) {
       console.error(error);
-      message.error("Failed to fetch Property");
+      message.error(error.response?.data?.message || "Failed to fetch Property");
     } finally {
       setLoading(false);
     }
@@ -53,7 +55,7 @@ const AllProperty = () => {
         getAllProperty();
       }
     } catch (error) {
-      message.error("Approve failed");
+      message.error(error.response?.data?.message || "Approve failed");
     }
   };
 
@@ -70,7 +72,7 @@ const AllProperty = () => {
           getAllProperty();
         }
       } catch (error) {
-        message.error("Delete failed");
+        message.error(error.response?.data?.message || "Delete failed");
       }
     }
   };
@@ -92,7 +94,7 @@ const AllProperty = () => {
               <th className="py-3 px-4 text-center">Address</th>
               <th className="py-3 px-4 text-center">Owner Contact</th>
               <th className="py-3 px-4 text-center">Amount</th>
-              <th className="py-3 px-4 text-center">Availability</th> {/* Status > Availability */}
+              <th className="py-3 px-4 text-center">Availability</th>
               <th className="py-3 px-4 text-center">Actions</th>
             </tr>
           </thead>
@@ -107,7 +109,6 @@ const AllProperty = () => {
                   <td className="py-2 px-4 text-center">{property.contact || property.owner?.phone || "N/A"}</td>
                   <td className="py-2 px-4 text-center font-semibold text-green-400">₹{property.price?.toLocaleString()}</td>
                   
-                  {/* YA LINE MADHE CHANGE KELA */}
                   <td className={`py-2 px-4 text-center font-bold ${
                     property.status === 'approved' ? 'text-green-400' : 'text-yellow-400'
                   }`}>
@@ -118,7 +119,7 @@ const AllProperty = () => {
                     {property.status !== 'approved' && (
                       <button 
                         onClick={() => handleApprove(property._id)}
-                        className="px-3 py-1 border border-blue-500 text-blue-400 rounded-lg hover:bg-blue-500/20 text-sm"
+                        className="px-3 py-1 border-blue-500 text-blue-400 rounded-lg hover:bg-blue-500/20 text-sm"
                       >
                         Approve
                       </button>
