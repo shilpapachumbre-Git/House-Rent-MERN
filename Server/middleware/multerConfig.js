@@ -1,29 +1,16 @@
-const multer = require("multer");
-const cloudinary = require("../config/cloudinary"); // config/cloudinary.js file pahije
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
 
-// 1. Cloudinary Storage banavla - ata uploads folder chi garaj nahi
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: "house-rent-properties", // Cloudinary madhe ha folder banvel
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
-    public_id: (req, file) => Date.now() + "-" + file.originalname.replace(/\s/g, ""),
-  },
+  params: { folder: 'house-rent-properties', allowed_formats: ['jpg', 'png', 'jpeg', 'webp'] },
 });
 
-// 2. Image filter - same
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only images are allowed!"), false);
-  }
-};
-
-// 3. Multer export
-module.exports = multer({ 
-  storage: storage, // ata diskStorage nahi
-  fileFilter: fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
-});
+module.exports = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });

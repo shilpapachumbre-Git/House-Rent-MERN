@@ -14,20 +14,23 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// USER - /api/user routes
+// USER
 export const login = (data) => API.post("/api/user/login", data);
 export const register = (data) => API.post("/api/user/register", data);
 export const getUserData = () => API.get("/api/user/me");
 
-// OWNER - /api/owner routes
+// OWNER
 export const addProperty = (formData) => 
   API.post("/api/owner/add-property", formData, {
-    headers: { "Content-Type": "multipart/form-data" } // Image sathi he compulsory
+    headers: { "Content-Type": "multipart/form-data" }
   });
 
-export const getOwnerProperties = () => API.get("/api/owner/my-properties");
+export const getOwnerProperties = () => API.get("/api/owner/properties");
 export const getOwnerBookings = () => API.get("/api/owner/bookings");
 export const acceptBooking = (id) => API.put(`/api/owner/booking/${id}/accept`);
 export const rejectBooking = (id) => API.put(`/api/owner/booking/${id}/reject`);
+export const updateProperty = (id, formData) => 
+  API.put(`/api/owner/property/${id}`, formData, { headers: { "Content-Type": "multipart/form-data" }});
+export const deleteProperty = (id) => API.delete(`/api/owner/property/${id}`);
 
 export default API;
