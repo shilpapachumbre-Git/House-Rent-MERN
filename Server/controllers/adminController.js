@@ -25,7 +25,7 @@ exports.deleteUser = async (req, res) => {
 // Handle Owner Grant/Ungrant
 exports.handleStatus = async (req, res) => {
   try {
-    const { userid, status } = req.body; // status = true/false
+    const { userid, status } = req.body; 
     await User.findByIdAndUpdate(userid, { isGranted: status });
     res.status(200).json({ success: true, message: "Owner status updated" });
   } catch (err) {
@@ -48,7 +48,7 @@ exports.approveProperty = async (req, res) => {
   try {
     const property = await Property.findByIdAndUpdate(
       req.params.id, 
-      { status: 'approved' }, // <- lowercase kela, DB shi match honya sathi
+      { status: 'approved' }, 
       { new: true }
     );
     if(!property) return res.status(404).json({success: false, message: "Property not found"})
@@ -58,7 +58,7 @@ exports.approveProperty = async (req, res) => {
   }
 };
 
-// DELETE PROPERTY <- ADD KEL
+// DELETE PROPERTY 
 exports.deleteProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
@@ -66,11 +66,8 @@ exports.deleteProperty = async (req, res) => {
       return res.status(404).json({ success: false, message: "Property not found" });
     }
 
-    // Jar uploads folder madhun image pan delete karaychi asel tar
-    // const fs = require('fs');
-    // property.images.forEach(img => {
-    //   fs.unlinkSync(`uploads/${img}`);
-    // });
+    
+   
 
     await Property.findByIdAndDelete(req.params.id);
     
@@ -80,13 +77,13 @@ exports.deleteProperty = async (req, res) => {
   }
 };
 
-// Manage bookings - FIXED
+// Manage bookings 
 exports.getAllBookings = async (req, res) => {
   try {
     const bookings = await Booking.find()
       .populate("userId", "name email")
       .populate("ownerId", "name email")
-      .populate("propertyId", "title address price"); // <- Schema pramane change kela
+      .populate("propertyId", "title address price"); 
     
     res.status(200).json({ success: true, bookings });
   } catch (err) {

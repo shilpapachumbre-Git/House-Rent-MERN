@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const connectDB = require("./config/connect");
-const cloudinary = require("./config/cloudinary"); // 1. Cloudinary import kela
+const cloudinary = require("./config/cloudinary"); 
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -14,10 +14,10 @@ connectDB();
 // Middleware
 app.use(express.json()); 
 
-// CORS - Render + Localhost donhila permission
+
 const allowedOrigins = [
-  "https://house-rent-mern-client.onrender.com", // Render varcha Client URL
-  "http://localhost:5174" // Local testing sathi
+  "https://house-rent-mern-client.onrender.com", 
+  "http://localhost:5174" 
 ];
 
 app.use(cors({
@@ -25,9 +25,7 @@ app.use(cors({
   credentials: true
 }));
 
-// 2. Static folder for uploads DELETE kela 
-// Karan ata image Cloudinary var jatat, server var nahi
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Routes
 const userRoutes = require("./routes/userRoutes");

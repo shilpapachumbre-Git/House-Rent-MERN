@@ -38,7 +38,7 @@ exports.loginController = async (req, res) => {
   }
 };
 
-// 3. GET LOGGED IN USER DATA
+
 exports.authController = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -48,7 +48,7 @@ exports.authController = async (req, res) => {
   }
 };
 
-// 4. GET ALL PROPERTIES - Public
+
 exports.getAllPropertiesController = async (req, res) => {
   try {
     const properties = await Property.find({}).populate("owner", "name phone");
@@ -58,7 +58,7 @@ exports.getAllPropertiesController = async (req, res) => {
   }
 };
 
-// 5. BOOK PROPERTY
+
 exports.bookingHandleController = async (req, res) => {
   try {
     const { propertyid } = req.params;
@@ -81,7 +81,7 @@ exports.bookingHandleController = async (req, res) => {
   }
 };
 
-// 6. GET MY BOOKINGS - FIXED
+
 exports.getAllBookingsController = async (req, res) => {
   try {
     const bookings = await Booking.find({ userId: req.user.id }) 
@@ -94,7 +94,7 @@ exports.getAllBookingsController = async (req, res) => {
   }
 };
 
-// 7. FORGOT PASSWORD - TEMP
+
 exports.forgotPasswordController = async (req, res) => {
   try {
     const { email, password } = req.body;

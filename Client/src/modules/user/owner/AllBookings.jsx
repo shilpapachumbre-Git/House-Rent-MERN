@@ -6,7 +6,7 @@ import { getOwnerBookings, acceptBooking, rejectBooking } from "../../../api/aut
 const AllBookings = () => {
   const [allBookings, setAllBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState(null); // 1. Loading sathi add kela
+  const [updatingId, setUpdatingId] = useState(null); 
   const navigate = useNavigate();
   const userName = localStorage.getItem("userName") || "Owner"; 
 
@@ -33,12 +33,12 @@ const AllBookings = () => {
   useEffect(() => { getAllBookings(); }, []);
 
   const handleStatus = async (bookingId, action) => {
-    setUpdatingId(bookingId); // 2. Button disable karnyasathi
+    setUpdatingId(bookingId); 
     try {
       const res = action === "accept" ? await acceptBooking(bookingId) : await rejectBooking(bookingId);
       if (res.data.success) {
         message.success(res.data.message);
-        getAllBookings(); // list refresh
+        getAllBookings(); 
       } else {
         message.error(res.data.message);
       }

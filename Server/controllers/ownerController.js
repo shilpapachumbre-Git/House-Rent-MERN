@@ -1,8 +1,8 @@
 const Property = require('../models/PropertySchema');
 const Booking = require('../models/BookingSchema');
-const cloudinary = require('cloudinary').v2; // v2 confirm
+const cloudinary = require('cloudinary').v2; 
 
-// Cloudinary config - Render env var varun yeil
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -13,14 +13,14 @@ exports.addProperty = async (req, res) => {
   try {
     console.log("=== ADD PROPERTY CALLED ===");
     console.log("BODY:", req.body);
-    console.log("FILE:", req.file); // files -> file
+    console.log("FILE:", req.file); 
     console.log("CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
     console.log("USER ID:", req.user.id);
 
     const { title, type, address, price, contact, description } = req.body;
 
-    // HA LINE CHANGE KAR
-    const imageUrl = req.file? req.file.path : ""; // files -> file
+    
+    const imageUrl = req.file? req.file.path : ""; 
 
     if (!imageUrl) {
       console.log("ERROR: No image found");
@@ -45,7 +45,7 @@ exports.addProperty = async (req, res) => {
   }
 };
 
-// Get Owner Properties
+
 exports.getOwnerProperties = async (req, res) => {
   try {
     const properties = await Property.find({ owner: req.user.id }).sort({ createdAt: -1 });
@@ -55,7 +55,7 @@ exports.getOwnerProperties = async (req, res) => {
   }
 };
 
-// Get Owner Bookings
+
 exports.getOwnerBookings = async (req, res) => {
   try {
     const properties = await Property.find({ owner: req.user.id }).select('_id');
@@ -73,7 +73,7 @@ exports.getOwnerBookings = async (req, res) => {
   }
 };
 
-// ACCEPT BOOKING
+
 exports.acceptBooking = async (req, res) => {
   try {
     let booking = await Booking.findById(req.params.id).populate('propertyId');
@@ -104,7 +104,7 @@ exports.acceptBooking = async (req, res) => {
   }
 };
 
-// REJECT BOOKING
+
 exports.rejectBooking = async (req, res) => {
   try {
     let booking = await Booking.findById(req.params.id).populate('propertyId');
@@ -135,7 +135,7 @@ exports.rejectBooking = async (req, res) => {
   }
 };
 
-// Edit Property
+
 exports.updateProperty = async (req, res) => {
   try {
     let updateData = {...req.body };
@@ -152,7 +152,7 @@ exports.updateProperty = async (req, res) => {
   }
 };
 
-// Delete Property
+
 exports.deleteProperty = async (req, res) => {
   try {
     await Property.findByIdAndDelete(req.params.id);

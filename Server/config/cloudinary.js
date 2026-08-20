@@ -11,11 +11,11 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'house-rent-properties', // Cloudinary madhe ha folder banil
+    folder: 'house-rent-properties', 
     allowed_formats: ['jpg', 'png', 'jpeg', 'webp']
   },
 });
 
 const upload = multer({ storage });
 
-module.exports = upload; // IMP: upload export kela
+module.exports = upload; 

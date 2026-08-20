@@ -10,7 +10,7 @@ import ForgotPassword from "./modules/common/ForgotPassword";
 import AdminHome from "./modules/admin/AdminHome"; 
 import AllUsers from "./modules/admin/AllUsers"; 
 import AllPropertiesAdmin from "./modules/admin/AllProperty"; 
-import AllBookingsAdmin from "./modules/admin/AllBookings"; // <- he use karaycha
+import AllBookingsAdmin from "./modules/admin/AllBookings"; 
 
 // Owner
 import OwnerHome from "./modules/user/owner/OwnerHome";
@@ -22,7 +22,7 @@ import AllBookingsOwner from "./modules/user/owner/AllBookings";
 import RenterHome from "./modules/user/renter/RenterHome";
 import AllPropertiesRenter from "./modules/user/renter/AllProperties"; 
 import AllBookingsRenter from "./modules/user/renter/AllBookings"; 
-import AllPropertiesCard from "./modules/user/AllPropertiesCards";
+import AllPropertiesCard from "./modules/user/AllPropertiesCards"; 
 
 export const UserContext = createContext(null);
 
@@ -61,7 +61,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/properties" element={<AllPropertiesCard />} /> {/* <- public property list add kela */}
+        <Route path="/properties" element={<AllPropertiesCard />} /> 
 
         {/* 2. Owner Protected Routes */}
         <Route path="/ownerhome" element={user?.role === "owner" ? <OwnerHome /> : <Navigate to="/login" />} />
