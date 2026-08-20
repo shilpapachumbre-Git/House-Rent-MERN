@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const AllProperties = () => {
   const [properties, setProperties] = useState([]);
+  const [bookedIds, setBookedIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -13,18 +14,33 @@ const AllProperties = () => {
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchData = async () => {
       try {
-        const { data } = await axios.get(`${API_URL}/api/user/properties`);
-        if (data.success) setProperties(data.properties);
+        const token = localStorage.getItem("token");
+
+        const propRes = await axios.get(`${API_URL}/api/user/properties`);
+        if (propRes.data.success) setProperties(propRes.data.properties);
+
+        if(token){
+          const bookingRes = await axios.get(`${API_URL}/api/user/mybookings`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if(bookingRes.data.success){
+            const ids = bookingRes.data.bookings.map(b => b.property._id)
+            setBookedIds(ids)
+          }
+        }
       } catch (error) {
-        toast.error("Server la connect hot nahi");
+        toast.error("Failed to connect to server");
       } finally { setLoading(false); }
     };
-    fetchProperties();
+    fetchData();
   }, []);
 
   const openBookingModal = (property) => {
+    if(bookedIds.includes(property._id)){
+      return toast.info("You have already booked this property ✅")
+    }
     setSelectedProperty(property);
     setShowModal(true);
   };
@@ -37,15 +53,16 @@ const AllProperties = () => {
     try {
       const res = await axios.post(
         `${API_URL}/api/user/bookinghandle/${selectedProperty._id}`,
-        {
-          ownerId: selectedProperty.owner._id,
-         ...formData
-        },
+        { ownerId: selectedProperty.owner._id,...formData },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success(res.data.message);
+
+      toast.success("Booking Confirmed Successfully! ✅"); // ENGLISH
       setShowModal(false);
       setFormData({ startDate: "", endDate: "", phone: "" });
+
+      setBookedIds([...bookedIds, selectedProperty._id])
+
     } catch (error) {
       toast.error(error.response?.data?.error || "Booking failed");
     }
@@ -57,16 +74,12 @@ const AllProperties = () => {
     <div className="p-6 bg-gray-900 min-h-screen">
       <h2 className="text-3xl font-bold mb-6 text-white">All Properties</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {properties.map((property) => (
-          <div key={property._id} className="border border-gray-700 bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-indigo-600/40 transition transform hover:-translate-y-1">
+        {properties.map((property) => {
+          const isBooked = bookedIds.includes(property._id);
 
-            {/* FIX: Direct Cloudinary URL */}
-            <img
-              src={property.images?.[0] || "https://via.placeholder.com/400x200"}
-              className="w-full h-48 object-cover"
-              alt="Property"
-              onError={(e)=> e.target.src="https://via.placeholder.com/400x200"}
-            />
+          return (
+          <div key={property._id} className="border border-gray-700 bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-indigo-600/40 transition transform hover:-translate-y-1">
+            <img src={property.images?.[0] || "https://via.placeholder.com/400x200"} className="w-full h-48 object-cover" alt="Property" onError={(e)=> e.target.src="https://via.placeholder.com/400x200"}/>
 
             <div className="p-4">
               <h3 className="text-xl font-bold text-white">{property.address}</h3>
@@ -75,36 +88,30 @@ const AllProperties = () => {
               <p className="text-gray-300 text-sm mt-1">Owner: {property.owner?.name}</p>
               <p className="text-gray-400 text-xs">Contact: {property.contact}</p>
 
-              <button
-                onClick={() => openBookingModal(property)}
-                className="mt-3 w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
-              >
-                Book Now
-              </button>
+              {isBooked? (
+                <button disabled className="mt-3 w-full bg-green-600 text-white py-2 rounded cursor-not-allowed">
+                  Booked ✅
+                </button>
+              ) : (
+                <button onClick={() => openBookingModal(property)} className="mt-3 w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+                  Book Now
+                </button>
+              )}
             </div>
           </div>
-        ))}
+        )})}
       </div>
 
       {/* BOOKING MODAL */}
       {showModal && selectedProperty && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-6 rounded-lg w-96 border border-gray-700">
+          <div className="bg-gray-800 p-6 rounded-lg w-96 border-gray-700">
             <h3 className="text-xl font-bold text-white mb-4">Book Property</h3>
-
-            <img
-              src={selectedProperty.images?.[0] || "https://via.placeholder.com/400x200"}
-              className="w-full h-32 object-cover rounded mb-3"
-              alt="Property"
-            />
-
+            <img src={selectedProperty.images?.[0]} className="w-full h-32 object-cover rounded mb-3" alt="Property"/>
             <form onSubmit={handleBook}>
-              <input type="date" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border border-gray-600"
-                value={formData.startDate} onChange={e=>setFormData({...formData, startDate: e.target.value})}/>
-              <input type="date" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border border-gray-600"
-                value={formData.endDate} onChange={e=>setFormData({...formData, endDate: e.target.value})}/>
-              <input type="text" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border border-gray-600" placeholder="Your Phone"
-                value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})}/>
+              <input type="date" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border-gray-600" value={formData.startDate} onChange={e=>setFormData({...formData, startDate: e.target.value})}/>
+              <input type="date" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border-gray-600" value={formData.endDate} onChange={e=>setFormData({...formData, endDate: e.target.value})}/>
+              <input type="text" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border-gray-600" placeholder="Your Phone" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})}/>
               <div className="flex gap-2">
                 <button type="submit" className="w-full bg-green-600 py-2 rounded hover:bg-green-700">Confirm Booking</button>
                 <button type="button" onClick={()=>setShowModal(false)} className="w-full bg-red-600 py-2 rounded hover:bg-red-700">Cancel</button>
