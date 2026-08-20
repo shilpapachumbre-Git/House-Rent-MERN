@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { addProperty } from "../../api/authApi"; // FIXED
+import axios from "axios";
+
 
 function AddProperty() {
   const [image, setImage] = useState(null);
@@ -51,15 +52,13 @@ function AddProperty() {
     formData.append("contact", propertyDetails.contact);
     formData.append("price", propertyDetails.price);
     formData.append("description", propertyDetails.description);
-    formData.append("images", image); // Backend expects "images"
+    formData.append("images", image); // Backend la "images" lagta
 
     try {
       const res = await addProperty(formData);
       if(res.data.success){
         message.success("Property submitted! Waiting for admin approval.");
-        setTimeout(() => navigate("/ownerhome"), 1500); // ownerhome var pathavla
-      } else {
-        message.error(res.data.message || "Failed to add property");
+        setTimeout(() => navigate("/owner/properties"), 1500);
       }
     } catch (error) {
       console.error(error);
@@ -70,89 +69,37 @@ function AddProperty() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-gray-900/80 border-gray-700 backdrop-blur-md shadow-2xl rounded-xl p-8 mt-6 text-white">
+    <div className="max-w-4xl mx-auto bg-gray-900/80 border border-gray-700 backdrop-blur-md shadow-2xl rounded-xl p-8 mt-6 text-white">
       <h2 className="text-3xl font-extrabold text-indigo-400 mb-8 text-center">Add New Property</h2>
 
       <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm mb-2 text-gray-300">Property Type</label>
-            <select name="title" value={propertyDetails.title} onChange={handleChange} className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500">
-              <option value="residential">Residential</option>
-              <option value="commercial">Commercial</option>
-              <option value="land/plot">Land/Plot</option>
-            </select>
-          </div>
+          <select name="title" value={propertyDetails.title} onChange={handleChange} className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3">
+            <option value="residential">Residential</option>
+            <option value="commercial">Commercial</option>
+            <option value="land/plot">Land/Plot</option>
+          </select>
+
+          <select name="type" value={propertyDetails.type} onChange={handleChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3">
+            <option value="rent">For Rent</option>
+            <option value="sale">For Sale</option>
+          </select>
+
+          <input type="text" name="address" value={propertyDetails.address} onChange={handleChange} placeholder="Full Address *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+
+          <input type="tel" name="contact" value={propertyDetails.contact} onChange={handleChange} placeholder="Contact No *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+
+          <input type="number" name="price" value={propertyDetails.price} onChange={handleChange} placeholder="Price ₹ *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
           <div>
-            <label className="block text-sm mb-2 text-gray-300">For</label>
-            <select name="type" value={propertyDetails.type} onChange={handleChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500">
-              <option value="rent">For Rent</option>
-              <option value="sale">For Sale</option>
-            </select>
-          </div>
-
-          <input
-            type="text"
-            name="address"
-            value={propertyDetails.address}
-            onChange={handleChange}
-            placeholder="Full Address *"
-            required
-            className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500"
-          />
-
-          <input
-            type="tel"
-            name="contact"
-            value={propertyDetails.contact}
-            onChange={handleChange}
-            placeholder="Contact No *"
-            required
-            className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500"
-          />
-
-          <input
-            type="number"
-            name="price"
-            value={propertyDetails.price}
-            onChange={handleChange}
-            placeholder="Price ₹ *"
-            required
-            className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500"
-          />
-
-          <div>
-            <label className="block text-sm mb-2 text-gray-300">Upload Image *</label>
-            <input
-              type="file"
-              name="images"
-              accept="image/*"
-              required
-              onChange={handleImageChange}
-              className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white file:border-none file:rounded file:px-4 file:py-2"
-            />
-            {imagePreview && <img src={imagePreview} alt="preview" className="mt-2 h-24 w-24 object-cover rounded border-gray-700" />}
+            <input type="file" name="images" accept="image/*" required onChange={handleImageChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white"/>
+            {imagePreview && <img src={imagePreview} alt="preview" className="mt-2 h-24 w-24 object-cover rounded" />}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm mb-2 text-gray-300">Description</label>
-          <textarea
-            name="description"
-            value={propertyDetails.description}
-            onChange={handleChange}
-            rows={4}
-            placeholder="Additional Details..."
-            className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
+        <textarea name="description" value={propertyDetails.description} onChange={handleChange} rows={4} placeholder="Additional Details..." className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full font-semibold py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button type="submit" disabled={loading} className="w-full font-semibold py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
           {loading? "Submitting..." : "Submit For Approval"}
         </button>
       </form>

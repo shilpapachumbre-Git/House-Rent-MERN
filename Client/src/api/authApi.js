@@ -14,17 +14,15 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// AUTH - HE 2 LINE CHANGE KELE
-export const login = (data) => API.post("/api/auth/login", data); // /user -> /auth
-export const register = (data) => API.post("/api/auth/register", data); // /user -> /auth
-
-// USER - he tasach rahu de
+// USER - /api/user routes
+export const login = (data) => API.post("/api/user/login", data);
+export const register = (data) => API.post("/api/user/register", data);
 export const getUserData = () => API.get("/api/user/me");
 
-// OWNER
+// OWNER - /api/owner routes
 export const addProperty = (formData) => 
   API.post("/api/owner/add-property", formData, {
-    headers: { "Content-Type": "multipart/form-data" }
+    headers: { "Content-Type": "multipart/form-data" } // Image sathi he compulsory
   });
 
 export const getOwnerProperties = () => API.get("/api/owner/my-properties");
