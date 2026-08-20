@@ -6,7 +6,7 @@ const {
   handleStatus, 
   getAllProperties, 
   approveProperty,
-  deleteProperty, // <- ADD
+  deleteProperty, 
   getAllBookings 
 } = require('../controllers/adminController');
 
@@ -20,7 +20,7 @@ router.post('/handlestatus', handleStatus);
 
 router.get('/properties', getAllProperties);
 router.put('/properties/approve/:id', approveProperty);
-router.delete('/properties/:id', deleteProperty); // <- ADD DELETE ROUTE
+router.delete('/properties/:id', deleteProperty); 
 
 router.get('/bookings', getAllBookings);
 
