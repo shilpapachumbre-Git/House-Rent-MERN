@@ -1,6 +1,6 @@
 const express = require("express");
 const { protect, isOwner } = require("../middleware/authMiddleware");
-const upload = require("../middleware/multerConfig"); // { } kadhun takla
+const { upload } = require("../middleware/multerConfig"); // 1. he fix kela
 const { 
     addProperty, 
     getOwnerProperties, 
@@ -13,6 +13,7 @@ const {
 
 const router = express.Router();
 
+// KEY CHANGE: upload.array kela aahe
 router.post("/add-property", protect, isOwner, upload.array("images", 1), addProperty);
 router.get("/my-properties", protect, isOwner, getOwnerProperties);
 router.get("/my-bookings", protect, isOwner, getOwnerBookings);
