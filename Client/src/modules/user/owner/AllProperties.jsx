@@ -30,7 +30,7 @@ const AllProperties = () => {
       price: property.price,
       description: property.description,
     });
-    setImagePreview(property.images[0]); 
+    setImagePreview(property.images[0]); // Cloudinary URL direct
     setShow(true);
   };
 

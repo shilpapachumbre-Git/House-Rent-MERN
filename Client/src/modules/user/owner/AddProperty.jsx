@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { message } from "antd";
-import { addProperty } from "../../../api/authApi"; 
+import { addProperty } from "../../../api/authApi"; // useNavigate kadhla
 
 function AddProperty() {
   const [image, setImage] = useState(null);
@@ -43,7 +43,7 @@ function AddProperty() {
     });
     setImage(null);
     setImagePreview(null);
-    document.getElementById("fileInput").value = ""; 
+    document.getElementById("fileInput").value = ""; // file input pan clear
   }
 
   const handleSubmit = async (e) => {
@@ -69,7 +69,7 @@ function AddProperty() {
       const res = await addProperty(formData);
       if(res.data.success){
         message.success("Property submitted! Waiting for admin approval. ✅");
-        resetForm(); 
+        resetForm(); // <-- Yethech rahila. Navigate nahi
       }
     } catch (error) {
       console.error(error);

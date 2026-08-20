@@ -3,12 +3,11 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL; // Render cha backend URL
 
 const AllBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const userName = localStorage.getItem("name") || "User";
 
   useEffect(() => {
     fetchBookings();
@@ -32,53 +31,45 @@ const AllBookings = () => {
     }
   };
 
-  if (loading) return <div className="text-center py-10 text-white">Loading bookings...</div>;
+  if (loading) return <div className="text-center py-10">Loading bookings...</div>;
+
+  if (bookings.length === 0) {
+    return <div className="text-center py-10 text-gray-400">You have no bookings yet.</div>;
+  }
 
   return (
-    <div className="bg-[#121826] rounded-xl p-6 border-gray-800">
-      <h2 className="text-xl font-bold mb-4 text-indigo-400">All My Bookings</h2>
-      
-      {bookings.length === 0 ? (
-        <div className="text-center py-10 text-gray-400">You have no bookings yet.</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-blue-600 text-white">
-                <th className="p-3 text-sm font-semibold">Booking ID</th>
-                <th className="p-3 text-sm font-semibold">Property ID</th>
-                <th className="p-3 text-sm font-semibold">Tenant Name</th>
-                <th className="p-3 text-sm font-semibold">Phone</th>
-                <th className="p-3 text-sm font-semibold">From</th>
-                <th className="p-3 text-sm font-semibold">To</th>
-                <th className="p-3 text-sm font-semibold">Booking Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((booking) => (
-                <tr key={booking._id} className="border-b border-gray-700 hover:bg-[#1e293b]">
-                  <td className="p-3 text-xs">{booking._id}</td>
-                  <td className="p-3 text-xs">{booking.propertyId?._id}</td>
-                  <td className="p-3">{userName}</td>
-                  <td className="p-3">{booking.phone}</td>
-                  <td className="p-3">{new Date(booking.startDate).toLocaleDateString()}</td>
-                  <td className="p-3">{new Date(booking.endDate).toLocaleDateString()}</td>
-                  <td className="p-3">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full
-                      ${booking.status === "pending" 
-                        ? "bg-yellow-500/20 text-yellow-400" 
-                        : booking.status === "booked" 
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-red-500/20 text-red-400"}`}>
-                      {booking.status.toUpperCase()}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {bookings.map((booking) => (
+        <div key={booking._id} className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 shadow-lg hover:shadow-indigo-500/20 transition">
+
+          {/* Property Image */}
+          <img
+            src={booking.propertyId?.images?.[0] || "https://via.placeholder.com/400x250"}
+            alt={booking.propertyId?.title}
+            className="w-full h-40 object-cover rounded-lg mb-3"
+          />
+
+          {/* Property Details */}
+          <h3 className="text-lg font-bold text-indigo-300">{booking.propertyId?.title}</h3>
+          <p className="text-sm text-gray-400">{booking.propertyId?.address}</p>
+          <p className="text-sm text-gray-400">Type: {booking.propertyId?.type}</p>
+          <p className="text-lg font-semibold text-green-400 mt-2">₹{booking.propertyId?.price}/month</p>
+
+          {/* Booking Details */}
+          <div className="mt-4 border-t border-gray-700 pt-3">
+            <p><span className="font-semibold">From:</span> {new Date(booking.startDate).toLocaleDateString()}</p>
+            <p><span className="font-semibold">To:</span> {new Date(booking.endDate).toLocaleDateString()}</p>
+            <p><span className="font-semibold">Your Phone:</span> {booking.phone}</p>
+            <p><span className="font-semibold">Owner:</span> {booking.ownerId?.name}</p>
+          </div>
+
+          {/* Status Badge */}
+          <span className={`mt-3 inline-block px-3 py-1 text-xs font-semibold rounded-full
+            ${booking.status === "pending"? "bg-yellow-500/20 text-yellow-400" : "bg-green-500/20 text-green-400"}`}>
+            {booking.status.toUpperCase()}
+          </span>
         </div>
-      )}
+      ))}
       <ToastContainer position="top-right" theme="dark" autoClose={3000} />
     </div>
   );

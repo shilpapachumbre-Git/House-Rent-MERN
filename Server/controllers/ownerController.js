@@ -45,7 +45,7 @@ exports.addProperty = async (req, res) => {
   }
 };
 
-
+// Get Owner Properties
 exports.getOwnerProperties = async (req, res) => {
   try {
     const properties = await Property.find({ owner: req.user.id }).sort({ createdAt: -1 });
@@ -73,7 +73,7 @@ exports.getOwnerBookings = async (req, res) => {
   }
 };
 
-
+// ACCEPT BOOKING
 exports.acceptBooking = async (req, res) => {
   try {
     let booking = await Booking.findById(req.params.id).populate('propertyId');
@@ -104,7 +104,7 @@ exports.acceptBooking = async (req, res) => {
   }
 };
 
-
+// REJECT BOOKING
 exports.rejectBooking = async (req, res) => {
   try {
     let booking = await Booking.findById(req.params.id).populate('propertyId');
@@ -135,7 +135,7 @@ exports.rejectBooking = async (req, res) => {
   }
 };
 
-
+// Edit Property
 exports.updateProperty = async (req, res) => {
   try {
     let updateData = {...req.body };
@@ -152,7 +152,7 @@ exports.updateProperty = async (req, res) => {
   }
 };
 
-
+// Delete Property
 exports.deleteProperty = async (req, res) => {
   try {
     await Property.findByIdAndDelete(req.params.id);
