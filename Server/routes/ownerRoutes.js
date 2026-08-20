@@ -1,6 +1,6 @@
 const express = require("express");
 const { protect, isOwner } = require("../middleware/authMiddleware");
-const { upload } = require("../middleware/multerConfig"); // 1. he fix kela
+const upload = require("../middleware/multerConfig"); // 1. he fix kela
 const { 
     addProperty, 
     getOwnerProperties, 
