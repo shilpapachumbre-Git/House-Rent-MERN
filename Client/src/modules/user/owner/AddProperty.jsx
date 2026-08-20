@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { addProperty } from "../../api/axios";
+
 
 function AddProperty() {
   const [image, setImage] = useState(null);
@@ -17,8 +18,6 @@ function AddProperty() {
     price: "",
     description: "",
   });
-
-  const API_URL = import.meta.env.VITE_API_URL || "https://house-rent-mern-server.onrender.com";
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -46,13 +45,6 @@ function AddProperty() {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if(!token){
-      message.error("Please login first");
-      navigate("/login");
-      return;
-    }
-
     const formData = new FormData();
     formData.append("title", propertyDetails.title);
     formData.append("type", propertyDetails.type);
@@ -60,24 +52,14 @@ function AddProperty() {
     formData.append("contact", propertyDetails.contact);
     formData.append("price", propertyDetails.price);
     formData.append("description", propertyDetails.description);
-    formData.append("images", image); // <-- IMPORTANT: "images" kelay. Backend la match honar
+    formData.append("images", image); // Backend la "images" lagta
 
     try {
-      const res = await axios.post(
-        `${API_URL}/api/owner/add-property`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data"
-          },
-          withCredentials: true
-        }
-      );
-
-      message.success("Property submitted! Waiting for admin approval.");
-      setTimeout(() => navigate("/owner/properties"), 1500);
-
+      const res = await addProperty(formData);
+      if(res.data.success){
+        message.success("Property submitted! Waiting for admin approval.");
+        setTimeout(() => navigate("/owner/properties"), 1500);
+      }
     } catch (error) {
       console.error(error);
       message.error(error.response?.data?.message || "Failed to add property");
@@ -103,19 +85,19 @@ function AddProperty() {
             <option value="sale">For Sale</option>
           </select>
 
-          <input type="text" name="address" value={propertyDetails.address} onChange={handleChange} placeholder="Full Address" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+          <input type="text" name="address" value={propertyDetails.address} onChange={handleChange} placeholder="Full Address *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
-          <input type="tel" name="contact" value={propertyDetails.contact} onChange={handleChange} placeholder="Contact No" required className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+          <input type="tel" name="contact" value={propertyDetails.contact} onChange={handleChange} placeholder="Contact No *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
-          <input type="number" name="price" value={propertyDetails.price} onChange={handleChange} placeholder="Price ₹" required className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+          <input type="number" name="price" value={propertyDetails.price} onChange={handleChange} placeholder="Price ₹ *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
           <div>
-            <input type="file" name="images" accept="image/*" required onChange={handleImageChange} className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white"/>
+            <input type="file" name="images" accept="image/*" required onChange={handleImageChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white"/>
             {imagePreview && <img src={imagePreview} alt="preview" className="mt-2 h-24 w-24 object-cover rounded" />}
           </div>
         </div>
 
-        <textarea name="description" value={propertyDetails.description} onChange={handleChange} rows={4} placeholder="Additional Details..." className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+        <textarea name="description" value={propertyDetails.description} onChange={handleChange} rows={4} placeholder="Additional Details..." className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
 
         <button type="submit" disabled={loading} className="w-full font-semibold py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
           {loading? "Submitting..." : "Submit For Approval"}
