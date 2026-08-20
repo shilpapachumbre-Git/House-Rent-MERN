@@ -9,18 +9,18 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Add Property
 exports.addProperty = async (req, res) => {
   try {
     console.log("=== ADD PROPERTY CALLED ===");
     console.log("BODY:", req.body);
-    console.log("FILES:", req.files);
+    console.log("FILE:", req.file); // files -> file
     console.log("CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
     console.log("USER ID:", req.user.id);
 
     const { title, type, address, price, contact, description } = req.body;
 
-    const imageUrl = req.files && req.files.length > 0? req.files[0].path : "";
+    // HA LINE CHANGE KAR
+    const imageUrl = req.file? req.file.path : ""; // files -> file
 
     if (!imageUrl) {
       console.log("ERROR: No image found");
