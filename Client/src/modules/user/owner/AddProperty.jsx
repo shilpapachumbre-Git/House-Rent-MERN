@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { message } from "antd";
-import { addProperty } from "../../../api/authApi"; // path check kar
+import { addProperty } from "../../../api/authApi"; // useNavigate kadhla
 
 function AddProperty() {
   const [image, setImage] = useState(null);
@@ -43,8 +43,7 @@ function AddProperty() {
     });
     setImage(null);
     setImagePreview(null);
-    // file input pan reset karayla
-    document.querySelector('input[type="file"]').value = "";
+    document.getElementById("fileInput").value = ""; // file input pan clear
   }
 
   const handleSubmit = async (e) => {
@@ -70,7 +69,7 @@ function AddProperty() {
       const res = await addProperty(formData);
       if(res.data.success){
         message.success("Property submitted! Waiting for admin approval. ✅");
-        resetForm(); // <-- NAVIGATE KADHUN TAKLA. FAKT FORM CLEAR
+        resetForm(); // <-- Yethech rahila. Navigate nahi
       }
     } catch (error) {
       console.error(error);
@@ -102,7 +101,7 @@ function AddProperty() {
           <input type="number" name="price" value={propertyDetails.price} onChange={handleChange} placeholder="Price ₹ *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400 outline-none"/>
 
           <div>
-            <input type="file" name="images" accept="image/*" required onChange={handleImageChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white file:border-none file:rounded"/>
+            <input id="fileInput" type="file" name="images" accept="image/*" required onChange={handleImageChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white file:border-none file:rounded"/>
             {imagePreview && <img src={imagePreview} alt="preview" className="mt-2 h-24 w-24 object-cover rounded" />}
           </div>
         </div>
