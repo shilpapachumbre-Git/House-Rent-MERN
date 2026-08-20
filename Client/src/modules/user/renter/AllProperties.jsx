@@ -58,7 +58,7 @@ const AllProperties = () => {
         `${API_URL}/api/user/bookinghandle/${selectedProperty._id}`,
         { ownerId: selectedProperty.owner._id,...formData },
         { headers: { Authorization: `Bearer ${token}` }
-      );
+        });
 
       toast.success("Booking Confirmed Successfully! ✅", {position: "top-center", autoClose: 3000});
       setShowModal(false);
