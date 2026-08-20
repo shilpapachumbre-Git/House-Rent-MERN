@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { message } from "antd";
-import { useNavigate } from "react-router-dom";
-import { addProperty } from "../../../api/authApi";
+import { addProperty } from "../../../api/authApi"; // path check kar
 
 function AddProperty() {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const [propertyDetails, setPropertyDetails] = useState({
     title: "residential",
@@ -34,6 +32,21 @@ function AddProperty() {
     setPropertyDetails((prev) => ({...prev, [e.target.name]: e.target.value }));
   };
 
+  const resetForm = () => {
+    setPropertyDetails({
+      title: "residential",
+      type: "rent",
+      address: "",
+      contact: "",
+      price: "",
+      description: "",
+    });
+    setImage(null);
+    setImagePreview(null);
+    // file input pan reset karayla
+    document.querySelector('input[type="file"]').value = "";
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -56,8 +69,8 @@ function AddProperty() {
     try {
       const res = await addProperty(formData);
       if(res.data.success){
-        message.success("Property submitted! Waiting for admin approval.");
-        setTimeout(() => navigate("/owner"), 1500);
+        message.success("Property submitted! Waiting for admin approval. ✅");
+        resetForm(); // <-- NAVIGATE KADHUN TAKLA. FAKT FORM CLEAR
       }
     } catch (error) {
       console.error(error);
@@ -73,28 +86,28 @@ function AddProperty() {
 
       <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
-          <select name="title" value={propertyDetails.title} onChange={handleChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3">
+          <select name="title" value={propertyDetails.title} onChange={handleChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 outline-none">
             <option value="residential">Residential</option>
             <option value="commercial">Commercial</option>
             <option value="land/plot">Land/Plot</option>
           </select>
 
-          <select name="type" value={propertyDetails.type} onChange={handleChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3">
+          <select name="type" value={propertyDetails.type} onChange={handleChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 outline-none">
             <option value="rent">For Rent</option>
             <option value="sale">For Sale</option>
           </select>
 
-          <input type="text" name="address" value={propertyDetails.address} onChange={handleChange} placeholder="Full Address *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
-          <input type="tel" name="contact" value={propertyDetails.contact} onChange={handleChange} placeholder="Contact No *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
-          <input type="number" name="price" value={propertyDetails.price} onChange={handleChange} placeholder="Price ₹ *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+          <input type="text" name="address" value={propertyDetails.address} onChange={handleChange} placeholder="Full Address *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400 outline-none"/>
+          <input type="tel" name="contact" value={propertyDetails.contact} onChange={handleChange} placeholder="Contact No *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400 outline-none"/>
+          <input type="number" name="price" value={propertyDetails.price} onChange={handleChange} placeholder="Price ₹ *" required className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400 outline-none"/>
 
           <div>
-            <input type="file" name="images" accept="image/*" required onChange={handleImageChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white"/>
+            <input type="file" name="images" accept="image/*" required onChange={handleImageChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-2 file:bg-indigo-600 file:text-white file:border-none file:rounded"/>
             {imagePreview && <img src={imagePreview} alt="preview" className="mt-2 h-24 w-24 object-cover rounded" />}
           </div>
         </div>
 
-        <textarea name="description" value={propertyDetails.description} onChange={handleChange} rows={4} placeholder="Additional Details..." className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400"/>
+        <textarea name="description" value={propertyDetails.description} onChange={handleChange} rows={4} placeholder="Additional Details..." className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3 placeholder-gray-400 outline-none"/>
 
         <button type="submit" disabled={loading} className="w-full font-semibold py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
           {loading? "Submitting..." : "Submit For Approval"}
