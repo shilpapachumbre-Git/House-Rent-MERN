@@ -6,26 +6,21 @@ import { useNavigate } from "react-router-dom";
 
 const AllProperties = () => {
   const [properties, setProperties] = useState([]);
-  const [bookings, setBookings] = useState([]);
   const [bookedIds, setBookedIds] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("properties"); // properties | bookings
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterAd, setFilterAd] = useState("all");
-
   const [showModal, setShowModal] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [formData, setFormData] = useState({ startDate: "", endDate: "", phone: "" });
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
-  const userName = localStorage.getItem("name") || "User";
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-
         const propRes = await axios.get(`${API_URL}/api/user/properties`);
         if (propRes.data.success) setProperties(propRes.data.properties);
 
@@ -34,7 +29,6 @@ const AllProperties = () => {
             headers: { Authorization: `Bearer ${token}` }
           });
           if(bookingRes.data.success){
-            setBookings(bookingRes.data.bookings)
             const ids = bookingRes.data.bookings.map(b => b.propertyId?._id).filter(Boolean)
             setBookedIds(ids)
           }
@@ -49,6 +43,9 @@ const AllProperties = () => {
   const openBookingModal = (property) => {
     if(bookedIds.includes(property._id)){
       return toast.info("You have already booked this property ✅")
+    }
+    if(property.status!== "available" && property.status!== "approved"){
+      return toast.error("This property is not available")
     }
     setSelectedProperty(property);
     setShowModal(true);
@@ -65,12 +62,10 @@ const AllProperties = () => {
         { ownerId: selectedProperty.owner._id,...formData },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       toast.success("Booking Confirmed Successfully! ✅");
       setShowModal(false);
       setFormData({ startDate: "", endDate: "", phone: "" });
       setBookedIds([...bookedIds, selectedProperty._id])
-      fetchData(); // refresh bookings
     } catch (error) {
       toast.error(error.response?.data?.error || "Booking failed");
     }
@@ -88,102 +83,71 @@ const AllProperties = () => {
     <div className="min-h-screen bg-[#0a0f1a] text-white p-6">
       <ToastContainer theme="dark" position="top-right"/>
 
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-indigo-400">RentEase</h1>
-        <div className="flex gap-3 items-center">
-          <span>Hi, {userName}</span>
-          <button onClick={()=>{localStorage.clear(); navigate("/login")}} className="bg-red-600 px-4 py-1 rounded hover:bg-red-700">Log Out</button>
-        </div>
+      {/* Search + Filters */}
+      <div className="flex gap-4 mb-6 flex-wrap">
+        <input
+          type="text"
+          placeholder="Search by Address"
+          value={search}
+          onChange={e=>setSearch(e.target.value)}
+          className="bg-[#1e293b] p-2 rounded w-64 border-gray-700 outline-none"
+        />
+        <select value={filterAd} onChange={e=>setFilterAd(e.target.value)} className="bg-[#1e293b] p-2 rounded border-gray-700 outline-none">
+          <option value="all">All Ad Types</option>
+          <option value="rent">For Rent</option>
+          <option value="sale">For Sale</option>
+        </select>
+        <select value={filterType} onChange={e=>setFilterType(e.target.value)} className="bg-[#1e293b] p-2 rounded border-gray-700 outline-none">
+          <option value="all">All Types</option>
+          <option value="residential">Residential</option>
+          <option value="commercial">Commercial</option>
+          <option value="land/plot">Land/Plot</option>
+        </select>
       </div>
 
-      <div className="bg-[#121826] rounded-xl p-6 border border-gray-800">
-        {/* Tabs */}
-        <div className="flex gap-6 border-b border-gray-700 mb-6">
-          <button onClick={()=>setActiveTab("properties")} className={`pb-2 font-semibold ${activeTab==="properties"?"border-b-2 border-indigo-500 text-indigo-400":"text-gray-400"}`}>All Properties</button>
-          <button onClick={()=>setActiveTab("bookings")} className={`pb-2 font-semibold ${activeTab==="bookings"?"border-b-2 border-indigo-500 text-indigo-400":"text-gray-400"}`}>Booking History</button>
-        </div>
+      {/* Property Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredProperties.map((property) => {
+          const isBooked = bookedIds.includes(property._id);
+          const isUnavailable = property.status!== "available" && property.status!== "approved";
 
-        {activeTab === "properties" && (
-          <>
-            {/* Filters */}
-            <div className="flex gap-4 mb-6 flex-wrap">
-              <input type="text" placeholder="Search by Address" value={search} onChange={e=>setSearch(e.target.value)} className="bg-[#1e293b] p-2 rounded w-64 border-gray-700 outline-none"/>
-              <select value={filterAd} onChange={e=>setFilterAd(e.target.value)} className="bg-[#1e293b] p-2 rounded border-gray-700 outline-none">
-                <option value="all">All Ad Types</option>
-                <option value="rent">For Rent</option>
-                <option value="sale">For Sale</option>
-              </select>
-              <select value={filterType} onChange={e=>setFilterType(e.target.value)} className="bg-[#1e293b] p-2 rounded border-gray-700 outline-none">
-                <option value="all">All Types</option>
-                <option value="residential">Residential</option>
-                <option value="commercial">Commercial</option>
-                <option value="land/plot">Land/Plot</option>
-              </select>
+          return (
+          <div key={property._id} className="bg-[#1e293b] rounded-lg shadow-lg overflow-hidden border-gray-700">
+            <img
+              src={property.images?.[0] || "https://via.placeholder.com/400x250"}
+              className="w-full h-48 object-cover"
+              alt="Property"
+            />
+
+            <div className="p-4">
+              <h3 className="font-bold text-base mb-1">{property.address}</h3>
+              <p className="text-gray-400 text-sm capitalize mb-2">{property.title} - {property.type}</p>
+
+              <p className="text-gray-300 text-sm">Owner: {property.contact}</p>
+              <p className={`text-sm ${isUnavailable? "text-red-500" : "text-gray-300"}`}>
+                Availability: {isUnavailable? "Unavailable" : "Available"}
+              </p>
+              <p className="text-gray-300 text-sm font-semibold">Price: ₹{property.price}</p>
+
+              {isBooked? (
+                <button disabled className="mt-3 w-full bg-green-600 text-white py-2 rounded cursor-not-allowed">
+                  Booked
+                </button>
+              ) : isUnavailable? (
+                <button disabled className="mt-3 w-full bg-gray-600 text-white py-2 rounded cursor-not-allowed">
+                  Not Available
+                </button>
+              ) : (
+                <button
+                  onClick={() => openBookingModal(property)}
+                  className="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold"
+                >
+                  Get Info / Book
+                </button>
+              )}
             </div>
-
-            {/* Property Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProperties.map((property) => {
-                const isBooked = bookedIds.includes(property._id);
-                return (
-                <div key={property._id} className="bg-[#1e293b] rounded-lg shadow-lg overflow-hidden border-gray-700 hover:shadow-indigo-600/30 transition">
-                  <img src={property.images?.[0] || "https://via.placeholder.com/400x200"} className="w-full h-48 object-cover" alt="Property"/>
-                  <div className="p-4">
-                    <h3 className="font-bold mb-1">{property.address}</h3>
-                    <p className="text-gray-400 text-sm capitalize">{property.title} - {property.type}</p>
-                    <p className="text-gray-300 text-sm">Owner: {property.owner?.name}</p>
-                    <p className="text-gray-300 text-xs">Contact: {property.contact}</p>
-                    <p className="text-green-400 font-bold mt-1">Price: ₹{property.price}</p>
-                    <p className="text-gray-400 text-sm">Availability: Available</p>
-
-                    {isBooked? (
-                      <button disabled className="mt-3 w-full bg-green-600 text-white py-2 rounded cursor-not-allowed">Booked ✅</button>
-                    ) : (
-                      <button onClick={() => openBookingModal(property)} className="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Get Info / Book</button>
-                    )}
-                  </div>
-                </div>
-              )})}
-            </div>
-          </>
-        )}
-
-        {activeTab === "bookings" && (
-          <div>
-            <h2 className="text-xl font-bold mb-4 text-indigo-400">All My Bookings</h2>
-            {bookings.length === 0? <p className="text-gray-400">No bookings yet</p> : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-blue-600 text-white">
-                      <th className="p-3 text-sm">Booking ID</th>
-                      <th className="p-3 text-sm">Property ID</th>
-                      <th className="p-3 text-sm">Tenant Name</th>
-                      <th className="p-3 text-sm">Phone</th>
-                      <th className="p-3 text-sm">Booking Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bookings.map(b => (
-                      <tr key={b._id} className="border-b border-gray-700 hover:bg-[#1e293b]">
-                        <td className="p-3 text-xs">{b._id}</td>
-                        <td className="p-3 text-xs">{b.propertyId?._id}</td>
-                        <td className="p-3">{userName}</td>
-                        <td className="p-3">{b.phone}</td>
-                        <td className="p-3">
-                          <span className={`px-3 py-1 text-xs font-bold rounded-full ${b.status==="booked"?"bg-green-500/20 text-green-400":"bg-yellow-500/20 text-yellow-400"}`}>
-                            {b.status.toUpperCase()}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
-        )}
+        )})}
       </div>
 
       {/* BOOKING MODAL */}
