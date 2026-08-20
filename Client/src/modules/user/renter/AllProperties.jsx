@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify"; // ToastContainer add
+import "react-toastify/dist/ReactToastify.css"; // CSS add
 import { useNavigate } from "react-router-dom";
 
 const AllProperties = () => {
@@ -26,11 +27,12 @@ const AllProperties = () => {
             headers: { Authorization: `Bearer ${token}` }
           });
           if(bookingRes.data.success){
-            const ids = bookingRes.data.bookings.map(b => b.property._id)
+            const ids = bookingRes.data.bookings.map(b => b.propertyId._id) // FIXED HERE
             setBookedIds(ids)
           }
         }
       } catch (error) {
+        console.log(error)
         toast.error("Failed to connect to server");
       } finally { setLoading(false); }
     };
@@ -51,17 +53,16 @@ const AllProperties = () => {
     if(!token) return navigate("/login");
 
     try {
-      const res = await axios.post(
+      await axios.post(
         `${API_URL}/api/user/bookinghandle/${selectedProperty._id}`,
         { ownerId: selectedProperty.owner._id,...formData },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Booking Confirmed Successfully! ✅"); // ENGLISH
+      toast.success("Booking Confirmed Successfully! ✅", {position: "top-center", autoClose: 3000});
       setShowModal(false);
       setFormData({ startDate: "", endDate: "", phone: "" });
-
-      setBookedIds([...bookedIds, selectedProperty._id])
+      setBookedIds([...bookedIds, selectedProperty._id]) // Button la green karayla
 
     } catch (error) {
       toast.error(error.response?.data?.error || "Booking failed");
@@ -72,6 +73,7 @@ const AllProperties = () => {
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen">
+      <ToastContainer theme="dark"/> {/* ADD THIS */}
       <h2 className="text-3xl font-bold mb-6 text-white">All Properties</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {properties.map((property) => {
