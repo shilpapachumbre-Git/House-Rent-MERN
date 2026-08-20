@@ -1,6 +1,6 @@
 const express = require("express");
 const { protect, isOwner } = require("../middleware/authMiddleware");
-const upload = require("../middleware/upload");
+const upload = require("../middleware/multerConfig");
 const { addProperty, getOwnerProperties, getOwnerBookings, acceptBooking, rejectBooking, updateProperty, deleteProperty } = require("../controllers/ownerController");
 
 const router = express.Router();
