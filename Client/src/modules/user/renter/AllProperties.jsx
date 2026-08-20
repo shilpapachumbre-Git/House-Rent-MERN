@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify"; // ToastContainer add
-import "react-toastify/dist/ReactToastify.css"; // CSS add
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
 const AllProperties = () => {
@@ -27,7 +27,8 @@ const AllProperties = () => {
             headers: { Authorization: `Bearer ${token}` }
           });
           if(bookingRes.data.success){
-            const ids = bookingRes.data.bookings.map(b => b.propertyId._id) // FIXED HERE
+            // FIX 1: propertyId null asel tar error yeil mhanun?. lavla
+            const ids = bookingRes.data.bookings.map(b => b.propertyId?._id).filter(Boolean)
             setBookedIds(ids)
           }
         }
@@ -37,7 +38,7 @@ const AllProperties = () => {
       } finally { setLoading(false); }
     };
     fetchData();
-  }, []);
+  }, [API_URL]); // FIX 2: dependency add keli
 
   const openBookingModal = (property) => {
     if(bookedIds.includes(property._id)){
@@ -56,13 +57,13 @@ const AllProperties = () => {
       await axios.post(
         `${API_URL}/api/user/bookinghandle/${selectedProperty._id}`,
         { ownerId: selectedProperty.owner._id,...formData },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` }
       );
 
       toast.success("Booking Confirmed Successfully! ✅", {position: "top-center", autoClose: 3000});
       setShowModal(false);
       setFormData({ startDate: "", endDate: "", phone: "" });
-      setBookedIds([...bookedIds, selectedProperty._id]) // Button la green karayla
+      setBookedIds([...bookedIds, selectedProperty._id])
 
     } catch (error) {
       toast.error(error.response?.data?.error || "Booking failed");
@@ -73,7 +74,7 @@ const AllProperties = () => {
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen">
-      <ToastContainer theme="dark"/> {/* ADD THIS */}
+      <ToastContainer theme="dark" position="top-right"/>
       <h2 className="text-3xl font-bold mb-6 text-white">All Properties</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {properties.map((property) => {
@@ -107,12 +108,12 @@ const AllProperties = () => {
       {/* BOOKING MODAL */}
       {showModal && selectedProperty && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-6 rounded-lg w-96 border-gray-700">
+          <div className="bg-gray-800 p-6 rounded-lg w-96 border border-gray-700">
             <h3 className="text-xl font-bold text-white mb-4">Book Property</h3>
             <img src={selectedProperty.images?.[0]} className="w-full h-32 object-cover rounded mb-3" alt="Property"/>
             <form onSubmit={handleBook}>
               <input type="date" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border-gray-600" value={formData.startDate} onChange={e=>setFormData({...formData, startDate: e.target.value})}/>
-              <input type="date" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border-gray-600" value={formData.endDate} onChange={e=>setFormData({...formData, endDate: e.target.value})}/>
+              <input type="date" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border border-gray-600" value={formData.endDate} onChange={e=>setFormData({...formData, endDate: e.target.value})}/>
               <input type="text" required className="w-full p-2 mb-3 bg-gray-700 text-white rounded border-gray-600" placeholder="Your Phone" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})}/>
               <div className="flex gap-2">
                 <button type="submit" className="w-full bg-green-600 py-2 rounded hover:bg-green-700">Confirm Booking</button>
