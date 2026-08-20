@@ -21,16 +21,16 @@ export const getUserData = () => API.get("/api/user/me");
 
 // OWNER
 export const addProperty = (formData) => 
-  API.post("/api/owner/add-property", formData, {
-    headers: { "Content-Type": "multipart/form-data" }
-  });
+  API.post("/api/owner/add-property", formData); // <- header kadhla
 
 export const getOwnerProperties = () => API.get("/api/owner/properties");
 export const getOwnerBookings = () => API.get("/api/owner/bookings");
 export const acceptBooking = (id) => API.put(`/api/owner/booking/${id}/accept`);
 export const rejectBooking = (id) => API.put(`/api/owner/booking/${id}/reject`);
+
 export const updateProperty = (id, formData) => 
-  API.put(`/api/owner/property/${id}`, formData, { headers: { "Content-Type": "multipart/form-data" }});
+  API.put(`/api/owner/property/${id}`, formData); // <- ithun pan kadhla
+
 export const deleteProperty = (id) => API.delete(`/api/owner/property/${id}`);
 
 export default API;

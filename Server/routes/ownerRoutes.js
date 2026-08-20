@@ -15,7 +15,7 @@ const router = express.Router();
 
 // @route   POST /api/owner/add-property
 // @desc    Add new property
-router.post("/add-property", protect, isOwner, upload.single("images", 10), addProperty);
+router.post("/add-property", protect, isOwner, upload.single("images"), addProperty);
 
 // @route   GET /api/owner/properties  
 // @desc    Get all properties of logged in owner
