@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { addProperty } from "../../../api/ownerAPI"; // 1. HE LINE ADD KAR
 
 function AddProperty() {
   const [image, setImage] = useState(null);
@@ -52,10 +52,10 @@ function AddProperty() {
     formData.append("contact", propertyDetails.contact);
     formData.append("price", propertyDetails.price);
     formData.append("description", propertyDetails.description);
-    formData.append("images", image); // Backend la "images" lagta
+    formData.append("images", image); // Backend la "images" lagta - barobar aahe
 
     try {
-      const res = await addProperty(formData);
+      const res = await addProperty(formData); // 2. ATA HE CHALEL
       if(res.data.success){
         message.success("Property submitted! Waiting for admin approval.");
         setTimeout(() => navigate("/owner/properties"), 1500);
@@ -69,12 +69,12 @@ function AddProperty() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-gray-900/80 border border-gray-700 backdrop-blur-md shadow-2xl rounded-xl p-8 mt-6 text-white">
+    <div className="max-w-4xl mx-auto bg-gray-900/80 border-gray-700 backdrop-blur-md shadow-2xl rounded-xl p-8 mt-6 text-white">
       <h2 className="text-3xl font-extrabold text-indigo-400 mb-8 text-center">Add New Property</h2>
 
       <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
-          <select name="title" value={propertyDetails.title} onChange={handleChange} className="w-full bg-gray-800/80 border border-gray-700 rounded-lg px-3 py-3">
+          <select name="title" value={propertyDetails.title} onChange={handleChange} className="w-full bg-gray-800/80 border-gray-700 rounded-lg px-3 py-3">
             <option value="residential">Residential</option>
             <option value="commercial">Commercial</option>
             <option value="land/plot">Land/Plot</option>
