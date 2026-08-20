@@ -6,7 +6,7 @@ const {
   getAllPropertiesController, 
   authController, 
   bookingHandleController, 
-  getAllBookingsController // 
+  getAllBookingsController 
 } = require("../controllers/userController");
 
 const { protect } = require("../middleware/authMiddleware"); 
@@ -22,6 +22,6 @@ router.get("/properties", getAllPropertiesController);
 // Protected Routes
 router.get("/me", protect, authController);
 router.post("/bookinghandle/:propertyid", protect, bookingHandleController); 
-router.get("/bookings", protect, getAllBookingsController); // 
+router.get("/mybookings", protect, getAllBookingsController); // FIXED: /bookings -> /mybookings
 
 module.exports = router;

@@ -18,7 +18,7 @@ exports.registerController = async (req, res) => {
   }
 };
 
-// 2. LOGIN - FIX: name token madhe add kela
+// 2. LOGIN 
 exports.loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -26,7 +26,7 @@ exports.loginController = async (req, res) => {
     if (!user) return res.status(400).json({ success: false, message: "Invalid email or password" });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ success: false, message: "Invalid email or password" });
-    const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: "7d" }); // name add
+    const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.status(200).json({ 
       success: true, 
       message: "Login successful",
@@ -67,7 +67,7 @@ exports.bookingHandleController = async (req, res) => {
     const booking = await Booking.create({
       propertyId: propertyid,
       userId: req.user.id,        
-      userName: req.user.name,    // ata he work karel
+      userName: req.user.name,    
       ownerId,
       startDate,
       endDate,
@@ -81,12 +81,12 @@ exports.bookingHandleController = async (req, res) => {
   }
 };
 
-// 6. GET MY BOOKINGS - FIX: user -> userId
+// 6. GET MY BOOKINGS - FIXED
 exports.getAllBookingsController = async (req, res) => {
   try {
-    const bookings = await Booking.find({ userId: req.user.id }) // FIX HOTA
-      .populate("propertyId", "address price images contact owner type title") 
-      .populate("ownerId", "name"); 
+    const bookings = await Booking.find({ userId: req.user.id }) 
+      .populate("propertyId") // full property data
+      .populate("ownerId", "name email phone"); // owner details
     
     res.status(200).json({ success: true, bookings });
   } catch (error) {
