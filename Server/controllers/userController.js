@@ -64,6 +64,12 @@ exports.bookingHandleController = async (req, res) => {
     const { propertyid } = req.params;
     const { ownerId, startDate, endDate, phone } = req.body;
 
+    // Check property already booked aahe ka
+    const property = await Property.findById(propertyid);
+    if(property.status === "booked"){
+      return res.status(400).json({ success: false, message: "Property already booked" });
+    }
+
     const booking = await Booking.create({
       propertyId: propertyid,
       userId: req.user.id,        
@@ -81,13 +87,13 @@ exports.bookingHandleController = async (req, res) => {
   }
 };
 
-// 6. GET MY BOOKINGS - FIXED ✅
+// 6. GET MY BOOKINGS - FOR TENANT
 exports.getAllBookingsController = async (req, res) => {
   try {
     const bookings = await Booking.find({ userId: req.user.id }) 
       .populate("propertyId") // full property data
       .populate("ownerId", "name email phone") // owner details
-      .populate("userId", "name phone"); // tenant details add kele - yachyamule phone disnar
+      .populate("userId", "name phone"); // tenant details
     
     res.status(200).json({ success: true, bookings });
   } catch (error) {
@@ -95,7 +101,77 @@ exports.getAllBookingsController = async (req, res) => {
   }
 };
 
-// 7. FORGOT PASSWORD - TEMP
+// 7. GET BOOKINGS FOR OWNER
+exports.getOwnerBookingsController = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ ownerId: req.user.id }) 
+      .populate("propertyId")
+      .populate("userId", "name email phone");
+    
+    res.status(200).json({ success: true, bookings });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// 8. APPROVE BOOKING - OWNER SATHI
+exports.approveBookingController = async (req, res) => {
+  try {
+    const { id } = req.params; // booking id
+
+    const booking = await Booking.findById(id).populate("propertyId");
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    // Check ha property cha owner tech aahe ka
+    if (booking.ownerId.toString() !== req.user.id.toString()) {
+      return res.status(401).json({ success: false, message: "Not authorized" });
+    }
+
+    // 1. Booking status update
+    booking.status = "booked";
+    await booking.save();
+
+    // 2. Property cha status pan booked kara
+    await Property.findByIdAndUpdate(booking.propertyId._id, { status: "booked" });
+
+    res.status(200).json({ success: true, message: "Booking approved", booking });
+
+  } catch (error) {
+    console.log("Approve Error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// 9. REJECT BOOKING - OWNER SATHI
+exports.rejectBookingController = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const booking = await Booking.findById(id);
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    if (booking.ownerId.toString() !== req.user.id.toString()) {
+      return res.status(401).json({ success: false, message: "Not authorized" });
+    }
+
+    booking.status = "rejected";
+    await booking.save();
+
+    res.status(200).json({ success: true, message: "Booking rejected" });
+
+  } catch (error) {
+    console.log("Reject Error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// 10. FORGOT PASSWORD - TEMP
 exports.forgotPasswordController = async (req, res) => {
   try {
     const { email, password } = req.body;
