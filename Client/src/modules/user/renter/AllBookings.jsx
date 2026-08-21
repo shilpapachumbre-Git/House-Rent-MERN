@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_URL = import.meta.env.VITE_API_URL; 
+const API_URL = import.meta.env.VITE_API_URL; // Render cha backend URL
 
 const AllBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -31,20 +31,6 @@ const AllBookings = () => {
     }
   };
 
-  // Status color function
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "booked":
-        return "bg-green-500/20 text-green-400";
-      case "pending":
-        return "bg-yellow-500/20 text-yellow-400";
-      case "rejected":
-        return "bg-red-500/20 text-red-400";
-      default:
-        return "bg-gray-500/20 text-gray-400";
-    }
-  };
-
   if (loading) return <div className="text-center py-10 text-white">Loading bookings...</div>;
 
   if (bookings.length === 0) {
@@ -63,28 +49,26 @@ const AllBookings = () => {
             <thead>
               <tr className="bg-blue-600 text-white">
                 <th className="p-3 text-sm font-semibold">Booking ID</th>
-                <th className="p-3 text-sm font-semibold">Property</th>
-                <th className="p-3 text-sm font-semibold">Owner</th>
+                <th className="p-3 text-sm font-semibold">Property ID</th>
+                <th className="p-3 text-sm font-semibold">Tenant Name</th>
                 <th className="p-3 text-sm font-semibold">Phone</th>
-                <th className="p-3 text-sm font-semibold">Status</th>
+                <th className="p-3 text-sm font-semibold">Booking Status</th>
               </tr>
             </thead>
             <tbody className="bg-[#1e293b]">
               {bookings.map((booking) => (
                 <tr key={booking._id} className="border-b border-gray-700 hover:bg-[#25324a] transition">
-                  <td className="p-3 text-xs text-gray-300">{booking._id.slice(-8)}</td>
-                  
+                  <td className="p-3 text-xs text-gray-300">{booking._id}</td>
+                  <td className="p-3 text-xs text-gray-300">{booking.propertyId?._id}</td>
+                  <td className="p-3 text-gray-200">{booking.userId?.name || 'N/A'}</td> {/* BADALALE */}
+                  <td className="p-3 text-gray-200">{booking.userId?.phone || booking.phone || 'N/A'}</td> {/* BADALALE */}
                   <td className="p-3">
-                    <div className="text-gray-200 font-semibold">{booking.propertyId?.title || 'N/A'}</div>
-                    <div className="text-xs text-gray-400">{booking.propertyId?.location || ''}</div>
-                  </td>
-
-                  <td className="p-3 text-gray-200">{booking.ownerId?.name || 'N/A'}</td>
-                  <td className="p-3 text-gray-200">{booking.ownerId?.phone || booking.phone || 'N/A'}</td>
-                  
-                  <td className="p-3">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${getStatusColor(booking.status)}`}>
-                      {booking.status?.toUpperCase() || "N/A"}
+                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                      booking.status === "booked" 
+                        ? "bg-green-500/20 text-green-400" 
+                        : "bg-yellow-500/20 text-yellow-400"
+                    }`}>
+                      {booking.status.toUpperCase()}
                     </span>
                   </td>
                 </tr>
