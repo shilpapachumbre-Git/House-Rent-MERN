@@ -8,7 +8,6 @@ const AllBookings = () => {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null); 
   const navigate = useNavigate();
-  const userName = localStorage.getItem("userName") || "Owner"; 
 
   const getAllBookings = async () => {
     try {
@@ -75,17 +74,23 @@ const AllBookings = () => {
               </tr>
             </thead>
             <tbody>
-              {allBookings.length > 0 ? allBookings.map((booking) => (
+              {allBookings.length > 0 ? allBookings.map((booking) => {
+                // ITHE FIX: junya + navin donhi sathi fallback
+                const currentStatus = booking.bookingStatus || booking.status || 'pending';
+                const tenantName = booking.userName || booking.userId?.name || "N/A"; // userName pan check kar
+                const tenantPhone = booking.phone || booking.userId?.phone || "N/A"; // phone sathi fallback
+
+                return (
                 <tr key={booking._id} className="border-b border-gray-700 hover:bg-gray-800/40">
-                  <td className="py-3 px-4 text-xs text-gray-300">{booking._id}</td>
+                  <td className="py-3 px-4 text-xs text-gray-300">{booking._id.slice(-6)}</td>
                   <td className="py-3 px-4 text-gray-200">{booking.propertyId?.title || "Deleted"}</td>
-                  <td className="py-3 px-4 text-gray-200">{booking.userId?.name || "N/A"}</td>
-                  <td className="py-3 px-4 text-gray-200">{booking.userId?.phone || "N/A"}</td>
-                  <td className={`py-3 px-4 text-center font-semibold capitalize ${getStatusColor(booking.bookingStatus)}`}>
-                    {booking.bookingStatus}
+                  <td className="py-3 px-4 text-gray-200">{tenantName}</td>
+                  <td className="py-3 px-4 text-gray-200">{tenantPhone}</td>
+                  <td className={`py-3 px-4 text-center font-semibold capitalize ${getStatusColor(currentStatus)}`}>
+                    {currentStatus}
                   </td>
                   <td className="py-3 px-4 text-center">
-                    {booking.bookingStatus === "pending" && (
+                    {currentStatus === "pending" && ( // <- ithe pan currentStatus vapra
                       <div className="flex gap-2 justify-center">
                         <button 
                           onClick={() => handleStatus(booking._id, "accept")} 
@@ -105,7 +110,7 @@ const AllBookings = () => {
                     )}
                   </td>
                 </tr>
-              )) : <tr><td colSpan={6} className="py-10 text-center text-gray-400">No bookings found</td></tr>}
+              )}) : <tr><td colSpan={6} className="py-10 text-center text-gray-400">No bookings found</td></tr>}
             </tbody>
           </table>
         </div>

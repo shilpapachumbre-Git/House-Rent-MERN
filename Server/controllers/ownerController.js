@@ -1,7 +1,6 @@
 const Property = require('../models/PropertySchema');
 const Booking = require('../models/BookingSchema');
-const cloudinary = require('cloudinary').v2; 
-
+const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,18 +11,10 @@ cloudinary.config({
 exports.addProperty = async (req, res) => {
   try {
     console.log("=== ADD PROPERTY CALLED ===");
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file); 
-    console.log("CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
-    console.log("USER ID:", req.user.id);
-
     const { title, type, address, price, contact, description } = req.body;
-
-    
-    const imageUrl = req.file? req.file.path : ""; 
+    const imageUrl = req.file? req.file.path : "";
 
     if (!imageUrl) {
-      console.log("ERROR: No image found");
       return res.status(400).json({ success: false, message: "Image is required" });
     }
 
@@ -55,16 +46,15 @@ exports.getOwnerProperties = async (req, res) => {
   }
 };
 
-
 exports.getOwnerBookings = async (req, res) => {
   try {
     const properties = await Property.find({ owner: req.user.id }).select('_id');
     const propertyIds = properties.map(p => p._id);
 
     const bookings = await Booking.find({ propertyId: { $in: propertyIds } })
-   .populate('propertyId', 'title address price images')
-   .populate('userId', 'name email phone')
-   .sort({ createdAt: -1 });
+  .populate('propertyId', 'title address price images')
+  .populate('userId', 'name email phone') // <- yachyamule phone yeto
+  .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, bookings });
   } catch (err) {
@@ -73,7 +63,7 @@ exports.getOwnerBookings = async (req, res) => {
   }
 };
 
-// ACCEPT BOOKING
+// ACCEPT BOOKING - junya status sathi fallback add kela
 exports.acceptBooking = async (req, res) => {
   try {
     let booking = await Booking.findById(req.params.id).populate('propertyId');
@@ -86,7 +76,8 @@ exports.acceptBooking = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    if (booking.bookingStatus!== 'pending') {
+    const currentStatus = booking.bookingStatus || booking.status; // <- fallback
+    if (currentStatus!== 'pending') {
       return res.status(400).json({ success: false, message: "Booking already processed" });
     }
 
@@ -94,8 +85,8 @@ exports.acceptBooking = async (req, res) => {
     await booking.save();
 
     booking = await Booking.findById(req.params.id)
-   .populate('propertyId', 'title address price images')
-   .populate('userId', 'name phone');
+  .populate('propertyId', 'title address price images')
+  .populate('userId', 'name phone');
 
     res.status(200).json({ success: true, message: "Booking Accepted", booking });
   } catch (err) {
@@ -104,7 +95,7 @@ exports.acceptBooking = async (req, res) => {
   }
 };
 
-// REJECT BOOKING
+// REJECT BOOKING - junya status sathi fallback add kela
 exports.rejectBooking = async (req, res) => {
   try {
     let booking = await Booking.findById(req.params.id).populate('propertyId');
@@ -117,7 +108,8 @@ exports.rejectBooking = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    if (booking.bookingStatus!== 'pending') {
+    const currentStatus = booking.bookingStatus || booking.status; // <- fallback
+    if (currentStatus!== 'pending') {
       return res.status(400).json({ success: false, message: "Booking already processed" });
     }
 
@@ -125,8 +117,8 @@ exports.rejectBooking = async (req, res) => {
     await booking.save();
 
     booking = await Booking.findById(req.params.id)
-   .populate('propertyId', 'title address price images')
-   .populate('userId', 'name phone');
+  .populate('propertyId', 'title address price images')
+  .populate('userId', 'name phone');
 
     res.status(200).json({ success: true, message: "Booking Rejected", booking });
   } catch (err) {
@@ -135,12 +127,12 @@ exports.rejectBooking = async (req, res) => {
   }
 };
 
-// Edit Property
+// Edit Property - FIX: req.files -> req.file
 exports.updateProperty = async (req, res) => {
   try {
     let updateData = {...req.body };
-    if (req.files && req.files.length > 0) {
-      updateData.images = [req.files[0].path];
+    if (req.file) { // <- ITHE FIX KELA. single file sathi req.file
+      updateData.images = [req.file.path];
     }
     if (updateData.price) updateData.price = Number(updateData.price);
     if (updateData.type) updateData.type = updateData.type.toLowerCase();
