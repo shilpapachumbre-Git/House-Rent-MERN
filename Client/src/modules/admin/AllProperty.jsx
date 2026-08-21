@@ -10,7 +10,7 @@ const AllProperty = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // IMP: Hardcode + Fallback. Yane undefined cha issue jail
+  
   const API_URL = import.meta.env.VITE_API_URL || "https://house-rent-mern.onrender.com";
 
   const getAllProperty = async () => {
