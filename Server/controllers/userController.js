@@ -81,12 +81,13 @@ exports.bookingHandleController = async (req, res) => {
   }
 };
 
-// 6. GET MY BOOKINGS - FIXED
+// 6. GET MY BOOKINGS - FIXED ✅
 exports.getAllBookingsController = async (req, res) => {
   try {
     const bookings = await Booking.find({ userId: req.user.id }) 
       .populate("propertyId") // full property data
-      .populate("ownerId", "name email phone"); // owner details
+      .populate("ownerId", "name email phone") // owner details
+      .populate("userId", "name phone"); // tenant details add kele - yachyamule phone disnar
     
     res.status(200).json({ success: true, bookings });
   } catch (error) {

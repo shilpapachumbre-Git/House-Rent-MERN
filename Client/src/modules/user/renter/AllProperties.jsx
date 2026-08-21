@@ -22,29 +22,31 @@ const AllProperties = () => {
   const userName = localStorage.getItem("name") || "User";
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        const propRes = await axios.get(`${API_URL}/api/user/properties`);
-        if (propRes.data.success) setProperties(propRes.data.properties);
-
-        if(token){
-          const bookingRes = await axios.get(`${API_URL}/api/user/mybookings`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if(bookingRes.data.success){
-            setBookings(bookingRes.data.bookings)
-            const ids = bookingRes.data.bookings.map(b => b.propertyId?._id).filter(Boolean)
-            setBookedIds(ids)
-          }
-        }
-      } catch (error) {
-        toast.error("Failed to connect to server");
-      } finally { setLoading(false); }
-    };
     fetchData();
   }, [API_URL]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      const propRes = await axios.get(`${API_URL}/api/user/properties`);
+      if (propRes.data.success) setProperties(propRes.data.properties);
+
+      if(token){
+        const bookingRes = await axios.get(`${API_URL}/api/user/mybookings`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if(bookingRes.data.success){
+          setBookings(bookingRes.data.bookings)
+          const ids = bookingRes.data.bookings.map(b => b.propertyId?._id).filter(Boolean)
+          setBookedIds(ids)
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to connect to server");
+    } finally { setLoading(false); }
+  };
 
   const openBookingModal = (property) => {
     if(bookedIds.includes(property._id)){
@@ -70,7 +72,7 @@ const AllProperties = () => {
       setShowModal(false);
       setFormData({ startDate: "", endDate: "", phone: "" });
       setBookedIds([...bookedIds, selectedProperty._id])
-      fetchData(); // refresh bookings
+      fetchData();
     } catch (error) {
       toast.error(error.response?.data?.error || "Booking failed");
     }
@@ -89,8 +91,8 @@ const AllProperties = () => {
       <ToastContainer theme="dark" position="top-right"/>
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-indigo-400">RentEase</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-indigo-400">RentEase</h1>
         <div className="flex gap-3 items-center">
           <span>Hi, {userName}</span>
           <button onClick={()=>{localStorage.clear(); navigate("/login")}} className="bg-red-600 px-4 py-1 rounded hover:bg-red-700">Log Out</button>
@@ -106,9 +108,9 @@ const AllProperties = () => {
 
         {activeTab === "properties" && (
           <>
-            {/* Filters */}
-            <div className="flex gap-4 mb-6 flex-wrap">
-              <input type="text" placeholder="Search by Address" value={search} onChange={e=>setSearch(e.target.value)} className="bg-[#1e293b] p-2 rounded w-64 border-gray-700 outline-none"/>
+            {/* Filters - Screenshot sarkhe */}
+            <div className="flex gap-4 mb-8 flex-wrap">
+              <input type="text" placeholder="Search by Address" value={search} onChange={e=>setSearch(e.target.value)} className="bg-[#1e293b] p-2 rounded w-64 border border-gray-700 outline-none"/>
               <select value={filterAd} onChange={e=>setFilterAd(e.target.value)} className="bg-[#1e293b] p-2 rounded border-gray-700 outline-none">
                 <option value="all">All Ad Types</option>
                 <option value="rent">For Rent</option>
@@ -122,25 +124,24 @@ const AllProperties = () => {
               </select>
             </div>
 
-            {/* Property Cards */}
+            {/* Property Cards - Screenshot design */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProperties.map((property) => {
                 const isBooked = bookedIds.includes(property._id);
                 return (
-                <div key={property._id} className="bg-[#1e293b] rounded-lg shadow-lg overflow-hidden border-gray-700 hover:shadow-indigo-600/30 transition">
+                <div key={property._id} className="bg-[#1e293b] rounded-lg shadow-lg overflow-hidden border border-gray-700 hover:shadow-indigo-600/30 transition">
                   <img src={property.images?.[0] || "https://via.placeholder.com/400x200"} className="w-full h-48 object-cover" alt="Property"/>
                   <div className="p-4">
-                    <h3 className="font-bold mb-1">{property.address}</h3>
-                    <p className="text-gray-400 text-sm capitalize">{property.title} - {property.type}</p>
-                    <p className="text-gray-300 text-sm">Owner: {property.owner?.name}</p>
-                    <p className="text-gray-300 text-xs">Contact: {property.contact}</p>
-                    <p className="text-green-400 font-bold mt-1">Price: ₹{property.price}</p>
-                    <p className="text-gray-400 text-sm">Availability: Available</p>
+                    <h3 className="font-bold text-lg mb-1">{property.address}</h3>
+                    <p className="text-gray-400 text-sm capitalize mb-2">{property.title} - {property.type}</p>
+                    <p className="text-gray-300 text-sm">Owner: {property.owner?.phone || 'N/A'}</p>
+                    <p className="text-gray-400 text-sm">Availability: {property.availability || 'Available'}</p>
+                    <p className="text-green-400 font-bold mt-1 mb-3">Price: ₹{property.price}</p>
 
                     {isBooked? (
-                      <button disabled className="mt-3 w-full bg-green-600 text-white py-2 rounded cursor-not-allowed">Booked ✅</button>
+                      <button disabled className="w-full bg-green-600 text-white py-2 rounded cursor-not-allowed font-semibold">Booked ✅</button>
                     ) : (
-                      <button onClick={() => openBookingModal(property)} className="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Get Info / Book</button>
+                      <button onClick={() => openBookingModal(property)} className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold">Get Info / Book</button>
                     )}
                   </div>
                 </div>
@@ -170,7 +171,7 @@ const AllProperties = () => {
                         <td className="p-3 text-xs">{b._id}</td>
                         <td className="p-3 text-xs">{b.propertyId?._id}</td>
                         <td className="p-3">{userName}</td>
-                        <td className="p-3">{b.phone}</td>
+                        <td className="p-3">{b.phone || 'N/A'}</td>
                         <td className="p-3">
                           <span className={`px-3 py-1 text-xs font-bold rounded-full ${b.status==="booked"?"bg-green-500/20 text-green-400":"bg-yellow-500/20 text-yellow-400"}`}>
                             {b.status.toUpperCase()}
