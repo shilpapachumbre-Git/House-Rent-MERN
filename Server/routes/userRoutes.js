@@ -7,9 +7,9 @@ const {
   authController, 
   bookingHandleController, 
   getAllBookingsController,
-  getOwnerBookingsController, // NAVA
-  approveBookingController,   // NAVA
-  rejectBookingController     // NAVA
+  getOwnerBookingsController,
+  approveBookingController,
+  rejectBookingController
 } = require("../controllers/userController");
 
 const { protect, isOwner } = require("../middleware/authMiddleware"); 
@@ -25,11 +25,11 @@ router.get("/properties", getAllPropertiesController);
 // Protected Routes - TENANT
 router.get("/me", protect, authController);
 router.post("/bookinghandle/:propertyid", protect, bookingHandleController); 
-router.get("/mybookings", protect, getAllBookingsController); // Tenant chya bookings
+router.get("/mybookings", protect, getAllBookingsController);
 
 // Protected Routes - OWNER
-router.get("/owner/bookings", protect, isOwner, getOwnerBookingsController); // Owner la saglya booking requests
-router.put("/approve/:id", protect, isOwner, approveBookingController); // Approve karnyasathi
-router.put("/reject/:id", protect, isOwner, rejectBookingController);   // Reject karnyasathi
+router.get("/owner/bookings", protect, isOwner, getOwnerBookingsController);
+router.put("/approve/:id", protect, isOwner, approveBookingController);
+router.put("/reject/:id", protect, isOwner, rejectBookingController);
 
 module.exports = router;

@@ -51,7 +51,7 @@ exports.authController = async (req, res) => {
 // 4. GET ALL PROPERTIES - Public
 exports.getAllPropertiesController = async (req, res) => {
   try {
-    const properties = await Property.find({}).populate("owner", "name phone");
+    const properties = await Property.find({ status: "available" }).populate("owner", "name phone");
     res.status(200).json({ success: true, properties });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -64,8 +64,9 @@ exports.bookingHandleController = async (req, res) => {
     const { propertyid } = req.params;
     const { ownerId, startDate, endDate, phone } = req.body;
 
-    // Check property already booked aahe ka
     const property = await Property.findById(propertyid);
+    if(!property) return res.status(404).json({ success: false, message: "Property not found" });
+    
     if(property.status === "booked"){
       return res.status(400).json({ success: false, message: "Property already booked" });
     }
@@ -80,7 +81,7 @@ exports.bookingHandleController = async (req, res) => {
       phone,
       status: "pending"
     });
-    res.status(201).json({ success: true, message: "Booking request sent" });
+    res.status(201).json({ success: true, message: "Booking request sent", booking });
   } catch (error) {
     console.log("Booking Error:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -91,9 +92,10 @@ exports.bookingHandleController = async (req, res) => {
 exports.getAllBookingsController = async (req, res) => {
   try {
     const bookings = await Booking.find({ userId: req.user.id }) 
-      .populate("propertyId") // full property data
-      .populate("ownerId", "name email phone") // owner details
-      .populate("userId", "name phone"); // tenant details
+      .populate("propertyId")
+      .populate("ownerId", "name email phone")
+      .populate("userId", "name phone")
+      .sort({ createdAt: -1 });
     
     res.status(200).json({ success: true, bookings });
   } catch (error) {
@@ -106,7 +108,8 @@ exports.getOwnerBookingsController = async (req, res) => {
   try {
     const bookings = await Booking.find({ ownerId: req.user.id }) 
       .populate("propertyId")
-      .populate("userId", "name email phone");
+      .populate("userId", "name email phone")
+      .sort({ createdAt: -1 });
     
     res.status(200).json({ success: true, bookings });
   } catch (error) {
@@ -125,9 +128,14 @@ exports.approveBookingController = async (req, res) => {
       return res.status(404).json({ success: false, message: "Booking not found" });
     }
 
-    // Check ha property cha owner tech aahe ka
     if (booking.ownerId.toString() !== req.user.id.toString()) {
       return res.status(401).json({ success: false, message: "Not authorized" });
+    }
+
+    // Check property adhich booked aahe ka
+    const property = await Property.findById(booking.propertyId._id);
+    if(property.status === "booked"){
+      return res.status(400).json({ success: false, message: "Property already booked by someone else" });
     }
 
     // 1. Booking status update
@@ -150,7 +158,7 @@ exports.rejectBookingController = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const booking = await Booking.findById(id);
+    const booking = await Booking.findById(id).populate("propertyId");
 
     if (!booking) {
       return res.status(404).json({ success: false, message: "Booking not found" });
@@ -163,6 +171,9 @@ exports.rejectBookingController = async (req, res) => {
     booking.status = "rejected";
     await booking.save();
 
+    // Property punha available kara
+    await Property.findByIdAndUpdate(booking.propertyId._id, { status: "available" });
+
     res.status(200).json({ success: true, message: "Booking rejected" });
 
   } catch (error) {
@@ -171,7 +182,7 @@ exports.rejectBookingController = async (req, res) => {
   }
 };
 
-// 10. FORGOT PASSWORD - TEMP
+// 10. FORGOT PASSWORD
 exports.forgotPasswordController = async (req, res) => {
   try {
     const { email, password } = req.body;
