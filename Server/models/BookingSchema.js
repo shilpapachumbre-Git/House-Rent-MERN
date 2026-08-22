@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const bookingModel = new mongoose.Schema(
   {
-    propertyId: { // <- Report: property
+    propertyId: { 
       type: mongoose.Schema.Types.ObjectId,
       ref: "Property",
       required: true
@@ -11,7 +11,7 @@ const bookingModel = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    userId: { // <- Report: user
+    userId: { 
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -24,26 +24,20 @@ const bookingModel = new mongoose.Schema(
       type: String,
       required: [true, "Please provide a Phone Number"],
     },
-    startDate: { // <- Report: dates
+    startDate: { 
       type: Date,
       required: true
     },
-    endDate: { // <- Report: dates
+    endDate: { 
       type: Date,
       required: true
     },
     bookingStatus: {
       type: String,
-      enum: ['pending', 'approved', 'cancelled', 'completed'],
+      enum: ['pending', 'booked', 'rejected'],
       default: 'pending',
-      required: [true, "Please provide booking status"],
-    },
-  },
-  {
-    timestamps: true,
-    strict: false,
-  }
-);
+    }, 
+});
 
 const bookingSchema = mongoose.model("Booking", bookingModel);
 module.exports = bookingSchema;

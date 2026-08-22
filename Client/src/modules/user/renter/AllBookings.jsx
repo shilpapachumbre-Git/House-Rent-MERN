@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_URL = import.meta.env.VITE_API_URL; // Render cha backend URL
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AllBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -19,7 +19,6 @@ const AllBookings = () => {
       const res = await axios.get(`${API_URL}/api/user/mybookings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.data.success) {
         setBookings(res.data.bookings);
       }
@@ -32,7 +31,6 @@ const AllBookings = () => {
   };
 
   if (loading) return <div className="text-center py-10 text-white">Loading bookings...</div>;
-
   if (bookings.length === 0) {
     return <div className="text-center py-10 text-gray-400">You have no bookings yet.</div>;
   }
@@ -56,23 +54,27 @@ const AllBookings = () => {
               </tr>
             </thead>
             <tbody className="bg-[#1e293b]">
-              {bookings.map((booking) => (
+              {bookings.map((booking) => {
+                const currentStatus = booking.bookingStatus || booking.status || 'pending';
+                return (
                 <tr key={booking._id} className="border-b border-gray-700 hover:bg-[#25324a] transition">
-                  <td className="p-3 text-xs text-gray-300">{booking._id}</td>
-                  <td className="p-3 text-xs text-gray-300">{booking.propertyId?._id}</td>
-                  <td className="p-3 text-gray-200">{booking.userId?.name || 'N/A'}</td> {/* BADALALE */}
-                  <td className="p-3 text-gray-200">{booking.userId?.phone || booking.phone || 'N/A'}</td> {/* BADALALE */}
+                  <td className="p-3 text-xs text-gray-300">{booking._id.slice(-6)}</td>
+                  <td className="p-3 text-xs text-gray-300">{booking.propertyId?._id?.slice(-6) || 'N/A'}</td>
+                  <td className="p-3 text-gray-200">{booking.userId?.name || booking.userName || 'N/A'}</td>
+                  <td className="p-3 text-gray-200">{booking.userId?.phone || booking.phone || 'N/A'}</td>
                   <td className="p-3">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                      booking.status === "booked" 
+                    <span className={`px-3 py-1 text-xs font-bold rounded-full capitalize ${
+                      currentStatus === "booked" 
                         ? "bg-green-500/20 text-green-400" 
+                        : currentStatus === "rejected"
+                        ? "bg-red-500/20 text-red-400"
                         : "bg-yellow-500/20 text-yellow-400"
                     }`}>
-                      {booking.status.toUpperCase()}
+                      {currentStatus.toUpperCase()}
                     </span>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>

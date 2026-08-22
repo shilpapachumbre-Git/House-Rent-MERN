@@ -81,7 +81,7 @@ exports.acceptBooking = async (req, res) => {
       return res.status(400).json({ success: false, message: "Booking already processed" });
     }
 
-    booking.bookingStatus = 'approved';
+    booking.bookingStatus = 'booked';
     await booking.save();
 
     booking = await Booking.findById(req.params.id)
@@ -113,7 +113,7 @@ exports.rejectBooking = async (req, res) => {
       return res.status(400).json({ success: false, message: "Booking already processed" });
     }
 
-    booking.bookingStatus = 'cancelled';
+    booking.bookingStatus = 'rejected';
     await booking.save();
 
     booking = await Booking.findById(req.params.id)

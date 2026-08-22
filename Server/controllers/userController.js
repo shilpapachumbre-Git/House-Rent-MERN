@@ -72,7 +72,7 @@ exports.bookingHandleController = async (req, res) => {
       startDate,
       endDate,
       phone,
-      status: "pending"
+      bookingStatus: "pending"
     });
     res.status(201).json({ success: true, message: "Booking request sent" });
   } catch (error) {

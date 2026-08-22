@@ -49,9 +49,9 @@ const AllBookings = () => {
   };
 
   const getStatusColor = (status) => {
-    if(status === 'approved') return 'text-green-500'; 
+    if(status === 'booked') return 'text-green-500'; 
     if(status === 'pending') return 'text-yellow-400';
-    if(status === 'cancelled') return 'text-red-500';
+    if(status === 'rejected') return 'text-red-500';
     return 'text-gray-400';
   }
 
