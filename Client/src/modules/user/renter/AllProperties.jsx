@@ -25,7 +25,7 @@ const AllProperties = () => {
       const token = localStorage.getItem("token");
       const propRes = await axios.get(`${API_URL}/api/user/properties`);
       if (propRes.data.success) {
-        console.log("FIRST PROPERTY:", propRes.data.properties[0]); // Check kar
+        console.log("FIRST PROPERTY:", propRes.data.properties[0]);
         setProperties(propRes.data.properties);
       }
       if(token){
@@ -58,8 +58,8 @@ const AllProperties = () => {
       await axios.post(
         `${API_URL}/api/user/bookinghandle/${selectedProperty._id}`,
         {
-          ownerId: selectedProperty.owner?._id || selectedProperty.owner, // FIXED
-         ...formData
+          ownerId: selectedProperty.owner?._id || selectedProperty.owner,
+        ...formData
         },
         { headers: { Authorization: `Bearer ${token}` }}
       );
@@ -103,24 +103,23 @@ const AllProperties = () => {
         {filteredProperties.map((property) => {
           const isBooked = bookedIds.includes(property._id);
           return (
-          <div key={property._id} className="bg-[#1e293b] rounded-lg shadow-lg overflow-hidden border border-gray-700 hover:shadow-indigo-600/30 transition">
+          <div key={property._id} className="bg-[#1e293b] rounded-lg shadow-lg overflow-hidden border border-gray-700 hover:shadow-indigo-600/30 transition flex flex-col h-full">
             <img src={property.images?.[0] || "https://via.placeholder.com/400x200"} className="w-full h-48 object-cover" alt="Property"/>
-            <div className="p-4">
+            <div className="p-4 flex flex-col flex-1">
               <h3 className="font-bold text-lg mb-1 text-white">{property.address}</h3>
               <p className="text-gray-400 text-sm capitalize mb-2">{property.title} - {property.type}</p>
-
-              {/* FINAL FIX - NAME DISNAR */}
               <p className="text-white text-sm font-bold">Owner: {property.owner?.name || 'N/A'}</p>
               <p className="text-gray-300 text-sm">Phone: {property.owner?.phone || property.contact || 'N/A'}</p>
-
               <p className="text-gray-400 text-sm mt-1">Availability: {property.availability || 'Available'}</p>
               <p className="text-green-400 font-bold mt-1 mb-3">Price: ₹{property.price}</p>
 
-              {isBooked? (
-                <button disabled className="w-full bg-green-600 text-white py-2 rounded cursor-not-allowed font-semibold">Booked ✅</button>
-              ) : (
-                <button onClick={() => openBookingModal(property)} className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold">Get Info / Book</button>
-              )}
+              <div className="mt-auto pt-2">
+                {isBooked? (
+                  <button disabled className="w-full bg-green-600 text-white py-2 rounded cursor-not-allowed font-semibold">Booked ✅</button>
+                ) : (
+                  <button onClick={() => openBookingModal(property)} className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold">Get Info / Book</button>
+                )}
+              </div>
             </div>
           </div>
         )})}
