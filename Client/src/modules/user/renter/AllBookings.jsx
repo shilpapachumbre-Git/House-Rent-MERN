@@ -36,13 +36,36 @@ const AllBookings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0f1a] p-6">
+    <div className="min-h-screen bg-[#0a0f1a] p-4 md:p-6">
       <ToastContainer position="top-right" theme="dark" autoClose={3000} />
       
-      <div className="bg-[#121826] rounded-xl p-6 border-gray-800">
-        <h2 className="text-2xl font-bold mb-6 text-indigo-400">All My Bookings</h2>
+      <div className="bg-[#121826] rounded-xl p-4 md:p-6 border border-gray-800">
+        <h2 className="text-xl md:text-2xl font-bold mb-6 text-indigo-400">All My Bookings</h2>
 
-        <div className="overflow-x-auto rounded-lg border border-gray-700">
+        {/* MOBILE VIEW - Cards */}
+        <div className="md:hidden space-y-4">
+          {bookings.map((booking) => {
+            const currentStatus = booking.bookingStatus || booking.status || 'pending';
+            return (
+              <div key={booking._id} className="bg-[#1e293b] p-4 rounded-lg border border-gray-700">
+                <div className="flex justify-between mb-2">
+                  <span className="text-xs text-gray-400">ID: {booking._id.slice(-6)}</span>
+                  <span className={`px-2 py-1 text-[10px] font-bold rounded-full ${
+                    currentStatus === "booked" ? "bg-green-500/20 text-green-400" 
+                    : currentStatus === "rejected" ? "bg-red-500/20 text-red-400"
+                    : "bg-yellow-500/20 text-yellow-400"
+                  }`}>{currentStatus.toUpperCase()}</span>
+                </div>
+                <p className="text-sm text-gray-200">Property: {booking.propertyId?._id?.slice(-6) || 'N/A'}</p>
+                <p className="text-sm text-gray-200">Name: {booking.userId?.name || booking.userName || 'N/A'}</p>
+                <p className="text-sm text-gray-200">Phone: {booking.userId?.phone || booking.phone || 'N/A'}</p>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* LAPTOP VIEW - Table */}
+        <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-700">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-blue-600 text-white">
@@ -64,11 +87,9 @@ const AllBookings = () => {
                   <td className="p-3 text-gray-200">{booking.userId?.phone || booking.phone || 'N/A'}</td>
                   <td className="p-3">
                     <span className={`px-3 py-1 text-xs font-bold rounded-full capitalize ${
-                      currentStatus === "booked" 
-                        ? "bg-green-500/20 text-green-400" 
-                        : currentStatus === "rejected"
-                        ? "bg-red-500/20 text-red-400"
-                        : "bg-yellow-500/20 text-yellow-400"
+                      currentStatus === "booked" ? "bg-green-500/20 text-green-400" 
+                      : currentStatus === "rejected" ? "bg-red-500/20 text-red-400"
+                      : "bg-yellow-500/20 text-yellow-400"
                     }`}>
                       {currentStatus.toUpperCase()}
                     </span>
