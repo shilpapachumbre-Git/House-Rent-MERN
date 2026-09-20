@@ -11,25 +11,23 @@ const AllProperties = () => {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterAd, setFilterAd] = useState("all");
-
   const [showModal, setShowModal] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [formData, setFormData] = useState({ startDate: "", endDate: "", phone: "" });
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
-  useEffect(() => {
-    fetchData();
-  }, [API_URL]);
+  useEffect(() => { fetchData(); }, [API_URL]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-
       const propRes = await axios.get(`${API_URL}/api/user/properties`);
-      if (propRes.data.success) setProperties(propRes.data.properties);
-
+      if (propRes.data.success) {
+        console.log("FIRST PROPERTY:", propRes.data.properties[0]); // Check kar
+        setProperties(propRes.data.properties);
+      }
       if(token){
         const bookingRes = await axios.get(`${API_URL}/api/user/mybookings`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -56,14 +54,15 @@ const AllProperties = () => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     if(!token) return navigate("/login");
-
     try {
       await axios.post(
         `${API_URL}/api/user/bookinghandle/${selectedProperty._id}`,
-        { ownerId: selectedProperty.owner._id,...formData },
+        {
+          ownerId: selectedProperty.owner?._id || selectedProperty.owner, // FIXED
+         ...formData
+        },
         { headers: { Authorization: `Bearer ${token}` }}
       );
-
       toast.success("Booking Confirmed Successfully! ✅");
       setShowModal(false);
       setFormData({ startDate: "", endDate: "", phone: "" });
@@ -85,8 +84,6 @@ const AllProperties = () => {
   return (
     <div>
       <ToastContainer theme="dark" position="top-right"/>
-
-      {/* Fakt Filters - Tabs kadhle */}
       <div className="flex gap-4 mb-8 flex-wrap">
         <input type="text" placeholder="Search by Address" value={search} onChange={e=>setSearch(e.target.value)} className="bg-[#1e293b] p-2 rounded w-64 border border-gray-700 outline-none text-white"/>
         <select value={filterAd} onChange={e=>setFilterAd(e.target.value)} className="bg-[#1e293b] p-2 rounded border border-gray-700 outline-none text-white">
@@ -94,7 +91,7 @@ const AllProperties = () => {
           <option value="rent">For Rent</option>
           <option value="sale">For Sale</option>
         </select>
-        <select value={filterType} onChange={e=>setFilterType(e.target.value)} className="bg-[#1e293b] p-2 rounded border-gray-700 outline-none text-white">
+        <select value={filterType} onChange={e=>setFilterType(e.target.value)} className="bg-[#1e293b] p-2 rounded border border-gray-700 outline-none text-white">
           <option value="all">All Types</option>
           <option value="residential">Residential</option>
           <option value="commercial">Commercial</option>
@@ -102,7 +99,6 @@ const AllProperties = () => {
         </select>
       </div>
 
-      {/* Property Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProperties.map((property) => {
           const isBooked = bookedIds.includes(property._id);
@@ -112,8 +108,12 @@ const AllProperties = () => {
             <div className="p-4">
               <h3 className="font-bold text-lg mb-1 text-white">{property.address}</h3>
               <p className="text-gray-400 text-sm capitalize mb-2">{property.title} - {property.type}</p>
-              <p className="text-gray-300 text-sm">Owner: {property.owner?.phone || 'N/A'}</p>
-              <p className="text-gray-400 text-sm">Availability: {property.availability || 'Available'}</p>
+
+              {/* FINAL FIX - NAME DISNAR */}
+              <p className="text-white text-sm font-bold">Owner: {property.owner?.name || 'N/A'}</p>
+              <p className="text-gray-300 text-sm">Phone: {property.owner?.phone || property.contact || 'N/A'}</p>
+
+              <p className="text-gray-400 text-sm mt-1">Availability: {property.availability || 'Available'}</p>
               <p className="text-green-400 font-bold mt-1 mb-3">Price: ₹{property.price}</p>
 
               {isBooked? (
@@ -126,7 +126,6 @@ const AllProperties = () => {
         )})}
       </div>
 
-      {/* BOOKING MODAL */}
       {showModal && selectedProperty && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-[#1e293b] p-6 rounded-lg w-96 border border-gray-700">
