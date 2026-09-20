@@ -7,7 +7,15 @@ import { useNavigate } from "react-router-dom";
 const AllPropertiesCards = () => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
-  const loggedIn =!!localStorage.getItem("token") ||!!sessionStorage.getItem("token") || (!!user && Object.keys(user).length > 0);
+
+  // FINAL MOBILE + LAPTOP LOGIN CHECK
+  const loggedIn =!!(
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("token") ||
+    (user && Object.keys(user).length > 0)
+  );
 
   const [allProperties, setAllProperties] = useState([]);
   const [filterPropertyType, setPropertyType] = useState("");
@@ -76,11 +84,11 @@ const AllPropertiesCards = () => {
   useEffect(() => { getAllProperties(); }, []);
 
   const filteredProperties = allProperties
-  .filter((p) => filterPropertyAddress === "" || p.address?.toLowerCase().includes(filterPropertyAddress.toLowerCase()))
-  .filter((p) => filterPropertyAdType === "" || p.type?.toLowerCase().includes(filterPropertyAdType.toLowerCase()))
-  .filter((p) => filterPropertyType === "" || p.title?.toLowerCase().includes(filterPropertyType.toLowerCase()));
+   .filter((p) => filterPropertyAddress === "" || p.address?.toLowerCase().includes(filterPropertyAddress.toLowerCase()))
+   .filter((p) => filterPropertyAdType === "" || p.type?.toLowerCase().includes(filterPropertyAdType.toLowerCase()))
+   .filter((p) => filterPropertyType === "" || p.title?.toLowerCase().includes(filterPropertyType.toLowerCase()));
 
-  // === 3 NUMBER WALA ALERT ===
+  // === 3 NUMBER - FINAL ALERT ===
   const openModal = (property) => {
     if (!loggedIn) {
       alert("Register please");
@@ -128,15 +136,15 @@ const AllPropertiesCards = () => {
       </div>
 
       {showModal && selectedProperty && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50 p-4">
-          <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl relative border border-gray-700 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 flex items-end sm:items-center justify-center bg-black/70 z-50 p-0 sm:p-4">
+          <div className="bg-gray-900 p-4 sm:p-6 rounded-t-2xl sm:rounded-xl w-full max-w-2xl relative border border-gray-700 max-h-[85dvh] overflow-y-auto mx-0 sm:mx-auto">
             <button onClick={() => setShowModal(false)} className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl">✖</button>
             <h3 className="text-xl font-bold mb-4">Property Info</h3>
-            <img src={selectedProperty.images?.[0]} alt="Property" className="w-full h-48 object-cover rounded mb-4" />
-            <form className="mt-4 space-y-2" onSubmit={(e) => { e.preventDefault(); handleBooking("pending", selectedProperty._id, selectedProperty.owner._id); }}>
+            <img src={selectedProperty.images?.[0]} alt="Property" className="w-full h-40 sm:h-56 object-cover rounded-lg mb-4" />
+            <form className="mt-4 space-y-3 pb-6" onSubmit={(e) => { e.preventDefault(); handleBooking("pending", selectedProperty._id, selectedProperty.owner?._id || selectedProperty.owner); }}>
               <input type="text" placeholder="Your Full Name" required value={userDetails.fullName} onChange={(e) => setUserDetails({...userDetails, fullName: e.target.value })} className="bg-gray-800 border border-gray-700 p-2 w-full rounded text-white" />
               <input type="text" placeholder="Phone Number" required value={userDetails.phone} onChange={(e) => setUserDetails({...userDetails, phone: e.target.value })} className="bg-gray-800 border border-gray-700 p-2 w-full rounded text-white" />
-              <button type="submit" className="w-full bg-green-600 text-white py-2 rounded">Book Property</button>
+              <button type="submit" className="w-full bg-green-600 text-white py-2.5 rounded">Book Property</button>
             </form>
           </div>
         </div>
