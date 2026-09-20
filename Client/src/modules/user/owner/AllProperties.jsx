@@ -30,7 +30,7 @@ const AllProperties = () => {
       price: property.price,
       description: property.description,
     });
-    setImagePreview(property.images[0]); // Cloudinary URL direct
+    setImagePreview(property.images[0]);
     setShow(true);
   };
 
@@ -71,7 +71,6 @@ const AllProperties = () => {
       const formData = new FormData();
       Object.keys(editingPropertyData).forEach(key => formData.append(key, editingPropertyData[key]));
       if (image) formData.append("images", image);
-
       const res = await updateProperty(editingPropertyId, formData);
       if (res.data.success) {
         message.success("Property updated successfully");
@@ -100,15 +99,36 @@ const AllProperties = () => {
   if(loading) return <div className="text-center py-10 text-gray-400">Loading properties...</div>
 
   return (
-   <div className="p-6">
-    <div className="flex justify-between items-center mb-6">
-      <h2 className="text-3xl font-extrabold text-indigo-400">My Properties</h2>
-      <button onClick={() => navigate('/add-property')} className="bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700">
-        + Add Property
-      </button>
+   <div className="p-4 md:p-6">
+    <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 mb-6">
+      <h2 className="text-2xl md:text-3xl font-extrabold text-indigo-400">My Properties</h2>
+      <button onClick={() => navigate('/add-property')} className="bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700 text-white w-fit">+ Add Property</button>
     </div>
 
-    <div className="overflow-x-auto rounded-lg shadow-2xl border-gray-700 bg-gray-900/80">
+    {/* MOBILE CARDS */}
+    <div className="md:hidden space-y-4">
+      {allProperties.length > 0? allProperties.map((property) => (
+        <div key={property._id} className="bg-gray-900/80 border border-gray-700 rounded-xl p-4">
+          <div className="flex gap-3 mb-3">
+            <img src={property.images[0]} alt="" className="h-16 w-16 object-cover rounded"/>
+            <div>
+              <p className="text-white font-bold">{property.address}</p>
+              <p className="text-sm text-gray-400 capitalize">{property.title} - {property.type}</p>
+              <p className="text-green-400 font-semibold">₹{property.price?.toLocaleString()}</p>
+            </div>
+          </div>
+          <p className="text-sm text-gray-300">Contact: {property.contact}</p>
+          <p className={`text-sm font-bold ${property.status === "approved"? "text-green-400" : "text-yellow-400"}`}>{property.status === "approved"? "Available" : "Pending"}</p>
+          <div className="flex gap-2 mt-3">
+            <button onClick={() => handleShow(property)} className="flex-1 border border-indigo-500 text-indigo-400 py-2 rounded-lg">Edit</button>
+            <button onClick={() => handleDelete(property._id)} className="flex-1 border border-red-500 text-red-400 py-2 rounded-lg">Delete</button>
+          </div>
+        </div>
+      )) : <p className="text-center py-6 text-gray-400">No properties found</p>}
+    </div>
+
+    {/* LAPTOP TABLE */}
+    <div className="hidden md:block overflow-x-auto rounded-lg shadow-2xl border border-gray-700 bg-gray-900/80">
       <table className="w-full text-sm text-left text-gray-300">
         <thead className="bg-indigo-600/80 text-white">
           <tr>
@@ -121,7 +141,7 @@ const AllProperties = () => {
           {allProperties.length > 0? allProperties.map((property) => (
             <tr key={property._id} className="border-b border-gray-700 hover:bg-gray-800/60">
               <td className="px-4 py-3"><img src={property.images[0]} alt="" className="h-12 w-12 object-cover rounded"/></td>
-              <td className="px-4 py-3 text-xs">{property._id}</td>
+              <td className="px-4 py-3 text-xs">{property._id.slice(-6)}</td>
               <td className="px-4 py-3 capitalize">{property.title}</td>
               <td className="px-4 py-3 capitalize">{property.type}</td>
               <td className="px-4 py-3">{property.address}</td>
@@ -131,8 +151,8 @@ const AllProperties = () => {
                 {property.status === "approved"? "Available" : "Pending"}
               </td>
               <td className="px-4 py-3 flex gap-2">
-                <button onClick={() => handleShow(property)} className="px-3 py-1 text-sm border-indigo-500 text-indigo-400 rounded-lg">Edit</button>
-                <button onClick={() => handleDelete(property._id)} className="px-3 py-1 text-sm border border-red-500 text-red-400 rounded-lg">Delete</button>
+                <button onClick={() => handleShow(property)} className="px-3 py-1 border border-indigo-500 text-indigo-400 rounded-lg">Edit</button>
+                <button onClick={() => handleDelete(property._id)} className="px-3 py-1 border border-red-500 text-red-400 rounded-lg">Delete</button>
               </td>
             </tr>
           )) : <tr><td colSpan={9} className="text-center py-6 text-gray-400">No properties found</td></tr>}
@@ -141,27 +161,27 @@ const AllProperties = () => {
     </div>
 
     {show && (
-      <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50">
-        <div className="bg-gray-900/90 border-gray-700 text-white w-full max-w-xl p-6 rounded-xl shadow-2xl">
+      <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 p-4">
+        <div className="bg-gray-900/90 border border-gray-700 text-white w-full max-w-xl p-6 rounded-xl shadow-2xl overflow-y-auto max-h-[90vh]">
           <h3 className="text-2xl font-bold mb-6 text-indigo-400">Edit Property</h3>
           <form onSubmit={saveChanges} className="space-y-4">
-            <select name="title" value={editingPropertyData.title} onChange={handleChange} className="w-full bg-gray-800/70 border-gray-700 px-3 py-2 rounded-lg">
+            <select name="title" value={editingPropertyData.title} onChange={handleChange} className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-lg">
               <option value="residential">Residential</option><option value="commercial">Commercial</option><option value="land/plot">Land/Plot</option>
             </select>
-            <select name="type" value={editingPropertyData.type} onChange={handleChange} className="w-full bg-gray-800/70 border-gray-700 px-3 py-2 rounded-lg">
+            <select name="type" value={editingPropertyData.type} onChange={handleChange} className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-lg">
               <option value="rent">Rent</option><option value="sale">Sale</option>
             </select>
-            <input type="text" name="address" value={editingPropertyData.address} onChange={handleChange} className="w-full bg-gray-800/70 border-gray-700 px-3 py-2 rounded-lg"/>
-            <input type="text" name="contact" value={editingPropertyData.contact} onChange={handleChange} className="w-full bg-gray-800/70 border-gray-700 px-3 py-2 rounded-lg"/>
-            <input type="number" name="price" value={editingPropertyData.price} onChange={handleChange} className="w-full bg-gray-800/70 border-gray-700 px-3 py-2 rounded-lg"/>
-            <textarea name="description" value={editingPropertyData.description} onChange={handleChange} rows={3} className="w-full bg-gray-800/70 border-gray-700 px-3 py-2 rounded-lg"/>
+            <input type="text" name="address" value={editingPropertyData.address} onChange={handleChange} className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-lg"/>
+            <input type="text" name="contact" value={editingPropertyData.contact} onChange={handleChange} className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-lg"/>
+            <input type="number" name="price" value={editingPropertyData.price} onChange={handleChange} className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-lg"/>
+            <textarea name="description" value={editingPropertyData.description} onChange={handleChange} rows={3} className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-lg"/>
             <div>
               <label className="text-gray-300">Change Image:</label>
-              <input type="file" accept="image/*" onChange={handleImageChange} className="w-full bg-gray-800/70 border-gray-700 px-3 py-2 rounded-lg"/>
+              <input type="file" accept="image/*" onChange={handleImageChange} className="w-full bg-gray-800 border border-gray-700 px-3 py-2 rounded-lg mt-1"/>
               {imagePreview && <img src={imagePreview} className="h-20 w-20 mt-2 rounded object-cover"/>}
             </div>
             <div className="flex justify-end gap-3 mt-4">
-              <button type="button" onClick={handleClose} className="px-4 py-2 border-gray-600 rounded-lg">Cancel</button>
+              <button type="button" onClick={handleClose} className="px-4 py-2 border border-gray-600 rounded-lg">Cancel</button>
               <button type="submit" className="px-4 py-2 bg-indigo-600 rounded-lg">Save Changes</button>
             </div>
           </form>
