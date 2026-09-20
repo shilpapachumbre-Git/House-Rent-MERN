@@ -2,10 +2,12 @@ import axios from "axios";
 import React, { useState, useEffect, useContext } from "react";
 import Toast from "../common/Toast";
 import { UserContext } from "../../App";
+import { useNavigate } from "react-router-dom"; // ADD HE
 
 const AllPropertiesCards = () => {
   const { user } = useContext(UserContext);
   const loggedIn =!!user;
+  const navigate = useNavigate(); // ADD HE
 
   const [allProperties, setAllProperties] = useState([]);
   const [filterPropertyType, setPropertyType] = useState("");
@@ -25,10 +27,7 @@ const AllPropertiesCards = () => {
 
   const getAllProperties = async () => {
     try {
-      const res = await axios.get(
-        `${API_URL}/api/user/properties`,
-        { withCredentials: true }
-      );
+      const res = await axios.get(`${API_URL}/api/user/properties`, { withCredentials: true });
       if (res.data.success) setAllProperties(res.data.properties);
     } catch (error) {
       console.log(error);
@@ -41,15 +40,19 @@ const AllPropertiesCards = () => {
       showToast("error", "Please fill all details");
       return;
     }
+
+    // FIX 1: ownerId safe check
+    const finalOwnerId = ownerId || selectedProperty?.owner?._id || selectedProperty?.owner;
+
     try {
       const res = await axios.post(
         `${API_URL}/api/user/bookinghandle/${propertyId}`,
-        { userDetails, status, ownerId },
+        { userDetails, status, ownerId: finalOwnerId },
         { withCredentials: true }
       );
 
       if (res.data.success) {
-        showToast("success", res.data.message);
+        showToast("success", res.data.message || "Booking successful!");
         setShowModal(false);
         setUserDetails({ fullName: "", phone: "" });
         getAllProperties();
@@ -57,23 +60,23 @@ const AllPropertiesCards = () => {
         showToast("error", res.data.message);
       }
     } catch (error) {
-      console.log(error);
-      showToast("error", "Booking failed");
+      console.log("Booking Error:", error.response?.data);
+      // FIX 2: Real error dakhav
+      showToast("error", error.response?.data?.message || "Booking failed - Owner can't book own property");
     }
   };
 
-  useEffect(() => {
-    getAllProperties();
-  }, []);
+  useEffect(() => { getAllProperties(); }, []);
 
   const filteredProperties = allProperties
-   .filter((property) => filterPropertyAddress === "" || property.address?.toLowerCase().includes(filterPropertyAddress.toLowerCase()))
-   .filter((property) => filterPropertyAdType === "" || property.type?.toLowerCase().includes(filterPropertyAdType.toLowerCase()))
-   .filter((property) => filterPropertyType === "" || property.title?.toLowerCase().includes(filterPropertyType.toLowerCase()));
+  .filter((p) => filterPropertyAddress === "" || p.address?.toLowerCase().includes(filterPropertyAddress.toLowerCase()))
+  .filter((p) => filterPropertyAdType === "" || p.type?.toLowerCase().includes(filterPropertyAdType.toLowerCase()))
+  .filter((p) => filterPropertyType === "" || p.title?.toLowerCase().includes(filterPropertyType.toLowerCase()));
 
   const openModal = (property) => {
     if (!loggedIn) {
-      showToast("error", "Please login first");
+      showToast("error", "Please login first to book");
+      setTimeout(() => navigate("/login"), 1000); // Login la pathav
       return;
     }
     setSelectedProperty(property);
@@ -84,7 +87,6 @@ const AllPropertiesCards = () => {
     <div className="p-6 text-white">
       {toast.show && <Toast type={toast.type} message={toast.message} onClose={() => setToast({...toast, show: false })} />}
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-4 items-center mb-6">
         <input type="text" placeholder="Search by Address" value={filterPropertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} className="bg-gray-800/70 border-gray-700 p-2 rounded w-full sm:w-1/3 text-white" />
         <select value={filterPropertyAdType} onChange={(e) => setPropertyAdType(e.target.value)} className="bg-gray-800/70 border-gray-700 p-2 rounded text-white">
@@ -95,19 +97,11 @@ const AllPropertiesCards = () => {
         </select>
       </div>
 
-      {/* Property Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProperties.length > 0? (
           filteredProperties.map((property) => (
             <div key={property._id} className="bg-gray-800/70 border-gray-700 rounded-lg shadow-lg hover:shadow-indigo-600/40 transition transform hover:-translate-y-1 overflow-hidden">
-
-              {/* FIX: Direct Cloudinary URL */}
-              <img
-                src={property.images?.[0] || "https://picsum.photos/400/300"}
-                alt="Property"
-                className="w-full h-40 object-cover"
-                onError={(e)=> e.target.src="https://picsum.photos/400/300"}
-              />
+              <img src={property.images?.[0] || "https://picsum.photos/400/300"} alt="Property" className="w-full h-40 object-cover" onError={(e)=> e.target.src="https://picsum.photos/400/300"} />
               <div className="p-4">
                 <h3 className="font-semibold text-lg text-white">{property.address}</h3>
                 <p className="text-gray-400 text-sm capitalize">{property.title} - {property.type}</p>
@@ -134,21 +128,12 @@ const AllPropertiesCards = () => {
         )}
       </div>
 
-      {/* Booking Modal */}
       {showModal && selectedProperty && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50 backdrop-blur-sm">
-          <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl relative border-gray-700 shadow-xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl relative border border-gray-700 shadow-xl max-h-[90vh] overflow-y-auto">
             <button onClick={() => setShowModal(false)} className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl">✖</button>
             <h3 className="text-xl font-bold mb-4 text-white">Property Info</h3>
-
-            {/* FIX: Direct Cloudinary URL */}
-            <img
-              src={selectedProperty.images?.[0] || "https://via.placeholder.com/400"}
-              alt="Property"
-              className="w-full h-48 object-cover rounded mb-4"
-              onError={(e)=> e.target.src="https://via.placeholder.com/400"}
-            />
-
+            <img src={selectedProperty.images?.[0] || "https://via.placeholder.com/400"} alt="Property" className="w-full h-48 object-cover rounded mb-4" onError={(e)=> e.target.src="https://via.placeholder.com/400"} />
             <div className="space-y-2 text-sm">
               <p><b>Address:</b> {selectedProperty.address}</p>
               <p><b>Title:</b> {selectedProperty.title}</p>
@@ -158,8 +143,7 @@ const AllPropertiesCards = () => {
               <p><b>Owner Name:</b> {selectedProperty.owner?.name}</p>
               <p><b>Owner Contact:</b> {selectedProperty.contact}</p>
             </div>
-
-            <form className="mt-4 space-y-2" onSubmit={(e) => { e.preventDefault(); handleBooking("pending", selectedProperty._id, selectedProperty.owner._id); }}>
+            <form className="mt-4 space-y-2" onSubmit={(e) => { e.preventDefault(); handleBooking("pending", selectedProperty._id, selectedProperty.owner?._id || selectedProperty.owner); }}>
               <input type="text" name="fullName" placeholder="Your Full Name" required value={userDetails.fullName} onChange={(e) => setUserDetails({...userDetails, fullName: e.target.value })} className="bg-gray-800 border border-gray-700 p-2 w-full rounded text-white" />
               <input type="number" name="phone" placeholder="Phone Number" required value={userDetails.phone} onChange={(e) => setUserDetails({...userDetails, phone: e.target.value })} className="bg-gray-800 border border-gray-700 p-2 w-full rounded text-white" />
               <button type="submit" className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Book Property</button>
