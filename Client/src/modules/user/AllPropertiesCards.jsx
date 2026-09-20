@@ -7,7 +7,9 @@ import { useNavigate } from "react-router-dom";
 const AllPropertiesCards = () => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
-  const loggedIn =!!user;
+
+  // FINAL FIX: token ne check
+  const loggedIn =!!localStorage.getItem("token") ||!!sessionStorage.getItem("token") || (!!user && Object.keys(user).length > 0);
 
   const [allProperties, setAllProperties] = useState([]);
   const [filterPropertyType, setPropertyType] = useState("");
@@ -57,7 +59,7 @@ const AllPropertiesCards = () => {
           withCredentials: true,
           headers: {
             "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
+           ...(token && { Authorization: `Bearer ${token}` }),
           },
         }
       );
@@ -76,11 +78,11 @@ const AllPropertiesCards = () => {
   useEffect(() => { getAllProperties(); }, []);
 
   const filteredProperties = allProperties
-  .filter((p) => filterPropertyAddress === "" || p.address?.toLowerCase().includes(filterPropertyAddress.toLowerCase()))
-  .filter((p) => filterPropertyAdType === "" || p.type?.toLowerCase().includes(filterPropertyAdType.toLowerCase()))
-  .filter((p) => filterPropertyType === "" || p.title?.toLowerCase().includes(filterPropertyType.toLowerCase()));
+   .filter((p) => filterPropertyAddress === "" || p.address?.toLowerCase().includes(filterPropertyAddress.toLowerCase()))
+   .filter((p) => filterPropertyAdType === "" || p.type?.toLowerCase().includes(filterPropertyAdType.toLowerCase()))
+   .filter((p) => filterPropertyType === "" || p.title?.toLowerCase().includes(filterPropertyType.toLowerCase()));
 
-  // === POPUP + REGISTER ===
+  // === POPUP + REGISTER REDIRECT ===
   const openModal = (property) => {
     if (!loggedIn) {
       showToast("error", "Register please");
